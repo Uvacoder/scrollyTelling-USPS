@@ -26,7 +26,7 @@ var yAxis = d3.axisLeft().scale(y);
 svg.append("g").attr("class", "myYaxis");
 
 // Create a function that takes a dataset as input and update the plot:
-export function update(data) {
+export function updateLine(data) {
   // d3.selectAll(".bar").remove();
   d3.selectAll(".bar").transition().duration(1000).style("opacity", 0).remove();
   d3.select(".myXaxis").remove();
