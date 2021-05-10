@@ -14,7 +14,9 @@ mdTemp.forEach((row) => {
   totalMd.push(rowConverter(row));
 });
 
-const totalMdVolume = totalMd;
+const totalMdVolume = totalMd.sort(function (a, b) {
+  return a.date > b.date;
+});
 
 export { totalMdVolume };
 
