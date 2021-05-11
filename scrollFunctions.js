@@ -1,4 +1,10 @@
-import { updateLine, bar, drawAxes, drawBar } from "./graphFunctions.js";
+import {
+  updateLine,
+  bar,
+  drawAxes,
+  drawBar,
+  removeBar,
+} from "./graphFunctions.js";
 // import cra from "./data/craData.js";
 import { totalMdVolume } from "./data/dataPrep.js";
 import { per } from "./data/dataPrep.js";
@@ -47,7 +53,12 @@ function handleStepEnter(resp) {
   }
 
   if (yearElement) {
-    drawBar(totalMdVolume, currentYear);
+    if (resp.direction === "down") {
+      drawBar(totalMdVolume, currentYear);
+    }
+    if (resp.direction === "up") {
+      removeBar(totalMdVolume, currentYear);
+    }
   }
 
   // // changeEvents[currentStepId];

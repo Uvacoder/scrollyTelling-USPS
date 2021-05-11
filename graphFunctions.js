@@ -57,15 +57,62 @@ export function drawBar(data, currentYear) {
     .attr("width", 10)
     .attr("fill", "black")
     .attr("id", `bar${thisYear}`)
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("class", "bar");
 
   d3.select(`#bar${thisYear}`)
     .transition()
     .duration(1000)
     .attr("height", yScale(thisValue));
+
+  setTimeout(() => {
+    d3.selectAll(".bar zero").attr("height", (data) => {
+      // return yScale(data.value);
+    });
+  }, 1150);
 }
 
-export function removeBar(data, currentYear) {}
+export function removeBar(data, currentYear) {
+  d3.select(`#bar${currentYear}`)
+    .transition()
+    .duration(1000)
+    .attr("height", 0)
+    .attr("class", "bar zero");
+
+  const nextYear = currentYear + 1;
+
+  d3.select(`#bar${nextYear}`)
+    .transition()
+    .duration(1000)
+    .attr("height", 0)
+    .attr("class", "bar zero");
+
+  // setTimeout(() => {
+  //   d3.select(`#bar${currentYear}`).remove();
+  //   d3.select(`#bar${nextYear}`).remove();
+  // }, 1150);
+
+  //check for fast scrolling bars
+  const allYears = [];
+
+  const startYear = d3.min(data, (d) => {
+    return d.date;
+  });
+
+  const endYear = d3.max(data, (d) => {
+    return d.date;
+  });
+
+  for (let i = startYear; i < endYear; i++) {
+    allYears.push(i);
+  }
+
+  const barsExisting = d3.selectAll(".bar")._groups[0];
+
+  const barsRequired = allYears.slice(0, allYears.indexOf(currentYear) + 1);
+
+  barsRequired.map((year) => drawBar(data, year));
+}
 
 export function bar(data, currentYear) {
   // d3.selectAll(".bar").transition().duration(1000).remove();
