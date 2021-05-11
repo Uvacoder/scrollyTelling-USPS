@@ -14,10 +14,43 @@ export function drawAxes(data) {
 
   // append the svg object to the body of the page
   const svg = d3
-    .select("#my_dataviz")
+    .select("#primaryViz")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("id", "primaryGraph");
+
+  const xAxis = d3
+    .axisBottom()
+    .scale(returnXScale(data))
+    .tickFormat(d3.format("d"));
+  svg
+    .append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .attr("class", "myXaxis")
+    .call(xAxis);
+
+  var yAxis = d3.axisLeft().scale(returnYAxisScale(data));
+  svg.append("g").attr("class", "myYaxis").call(yAxis);
+}
+
+export function drawSecondaryAxes(data) {
+  // d3.select("svg").remove();
+  // d3.select(".myXaxis").remove();
+  // d3.select(".myYaxis").remove();
+
+  // d3.select("#secondaryGraph").remove();
+
+  // append the svg object to the body of the page
+  const svg = d3
+    .select("#secondaryViz")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .attr("id", "secondaryGraph")
+    .attr("class", "secondary")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -46,8 +79,6 @@ export function drawBar(data, currentYear) {
 
   const thisYear = dataToyear[0].date;
   const thisValue = dataToyear[0].value;
-
-  console.log(dataToyear);
 
   svg
     .append("rect")

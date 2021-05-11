@@ -2,7 +2,7 @@
 
 export const margin = { top: 10, right: 30, bottom: 30, left: 50 };
 export const width = 460 - margin.left - margin.right;
-export const height = 400 - margin.top - margin.bottom;
+export const height = 300 - margin.top - margin.bottom;
 
 export function returnXScale(data) {
   return d3
@@ -45,3 +45,11 @@ export function returnYAxisScale(data) {
       }),
     ]);
 }
+
+export const changeEvents = {
+  //   intro: drawAxes(totalMdVolume),
+  // year2006: drawBar(),
+  // year2007: drawBar(),
+  // year2008: drawBar(),
+  // year2009: drawBar(),
+};

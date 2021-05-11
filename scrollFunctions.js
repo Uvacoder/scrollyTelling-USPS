@@ -2,21 +2,27 @@ import {
   updateLine,
   bar,
   drawAxes,
+  drawSecondaryAxes,
   drawBar,
   removeBar,
 } from "./graphFunctions.js";
-// import cra from "./data/craData.js";
 import { totalMdVolume } from "./data/dataPrep.js";
-import { per } from "./data/dataPrep.js";
-// import cow from "./data/dataPreprocessing";
+import textStory from "./textStory.js";
 
 const changeEvents = {
-  // intro: drawAxes(totalMdVolume),
-  // year2006: drawBar(),
-  // year2007: drawBar(),
-  // year2008: drawBar(),
-  // year2009: drawBar(),
+  intro: drawAxes,
 };
+
+// const funcArray = [drawAxes];
+
+// const changeEvents = {
+//   intro: drawAxes,
+// };
+
+let activateFunctions = [];
+// activateFunctions[0] = drawBar();
+
+// activateFunctions = [drawAxes, drawBar];
 
 const scroller = scrollama();
 
@@ -41,7 +47,9 @@ function handleStepEnter(resp) {
   const yearElement = currentStepClass.includes("year");
 
   if (currentStepId === "intro") {
-    drawAxes(totalMdVolume);
+    // drawAxes(totalMdVolume);
+    changeEvents.intro(totalMdVolume);
+    // activateFunctions[0]();
   }
 
   let currentYear;
@@ -61,7 +69,24 @@ function handleStepEnter(resp) {
     }
   }
 
-  // // changeEvents[currentStepId];
+  const renderedText = document.querySelector("#renderedText");
 
-  // // bar(totalMdVolume, currentYear);
+  renderedText.className = "fadeOut";
+
+  setTimeout(() => {
+    renderedText.className = "fadeIn";
+    renderedText.innerHTML = textStory[currentStepId];
+  }, 500);
+
+  console.log(currentYear);
+
+  if (currentYear === 2008) {
+    // d3.selectAll("#secondaryGraph").remove();
+    d3.selectAll(".secondary").remove();
+    drawSecondaryAxes(totalMdVolume);
+    // document.querySelector("#secondaryViz").innerHTML = "MORE STUFF";
+  }
+  if (currentYear < 2008) {
+    d3.select("#secondaryGraph").remove();
+  }
 }
