@@ -1,34 +1,74 @@
-// set the dimensions and margins of the graph
-var margin = { top: 10, right: 30, bottom: 30, left: 50 },
-  width = 460 - margin.left - margin.right,
-  height = 400 - margin.top - margin.bottom;
+import {
+  margin,
+  width,
+  height,
+  returnXScale,
+  returnYScale,
+  returnYAxisScale,
+} from "./graphDimensions.js";
 
-// append the svg object to the body of the page
-var svg = d3
-  .select("#my_dataviz")
-  .append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+export function drawAxes(data) {
+  d3.select("svg").remove();
+  d3.select(".myXaxis").remove();
+  d3.select(".myYaxis").remove();
 
-// Initialise a X axis:
-var x = d3.scaleLinear().range([0, width]).domain([2005, 2021]);
+  // append the svg object to the body of the page
+  const svg = d3
+    .select("#my_dataviz")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var xAxis = d3.axisBottom().scale(x).tickFormat(d3.format("d"));
-svg
-  .append("g")
-  .attr("transform", "translate(0," + height + ")")
-  .attr("class", "myXaxis")
-  .call(xAxis);
+  const xAxis = d3
+    .axisBottom()
+    .scale(returnXScale(data))
+    .tickFormat(d3.format("d"));
+  svg
+    .append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .attr("class", "myXaxis")
+    .call(xAxis);
 
-// Initialize an Y axis
-// var y = d3.scaleLinear().range([0, height]);
-var yAxisScale = d3.scaleLinear().range([height, 0]).domain([100, 250]);
-var yAxis = d3.axisLeft().scale(yAxisScale);
-svg.append("g").attr("class", "myYaxis").call(yAxis);
+  var yAxis = d3.axisLeft().scale(returnYAxisScale(data));
+  svg.append("g").attr("class", "myYaxis").call(yAxis);
+}
+
+export function drawBar(data, currentYear) {
+  // Initialise a X axis:
+  const xScale = returnXScale(data);
+  const yScale = returnYScale(data);
+
+  const svg = d3.select("svg");
+
+  const dataToyear = data.filter((row) => row.date === currentYear);
+
+  const thisYear = dataToyear[0].date;
+  const thisValue = dataToyear[0].value;
+
+  console.log(dataToyear);
+
+  svg
+    .append("rect")
+    .attr("x", xScale(thisYear))
+    .attr("y", height - yScale(thisValue))
+    .attr("height", 0)
+    .attr("width", 10)
+    .attr("fill", "black")
+    .attr("id", `bar${thisYear}`)
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  d3.select(`#bar${thisYear}`)
+    .transition()
+    .duration(1000)
+    .attr("height", yScale(thisValue));
+}
+
+export function removeBar(data, currentYear) {}
 
 export function bar(data, currentYear) {
+  // d3.selectAll(".bar").transition().duration(1000).remove();
   d3.selectAll(".bar").remove();
 
   // d3.select(".myXaxis").remove();
@@ -91,26 +131,25 @@ export function bar(data, currentYear) {
     .attr("class", "bar")
     .attr("x", (d, i) => {
       return x(d.date);
-      // return i * 20;
     })
     .attr("y", (d) => {
-      // return y(d.value) + 10;
-      // return y(d);
-
       return height - y(d.value);
-      // return 100;
     })
     .attr("width", 10)
     .attr("height", (d) => y(d.value))
     .attr("fill", "black")
     .attr("width", 10)
     .attr("height", (d, i) => {
-      return y(d.value);
+      // return y(d.value);
+      return 0;
     })
     .attr("fill", "black")
     .attr("id", (d) => d.value);
 
-  // d3.selectAll(".bar").transition().duration(1000);
+  // d3.selectAll(".bar")
+  //   .attr("height", (d) => y(d.value))
+  //   .transition()
+  //   .duration(1000);
 }
 
 // Create a function that takes a dataset as input and update the plot:

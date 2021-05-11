@@ -1,12 +1,15 @@
-import { updateLine, bar } from "./graphFunctions.js";
-import cra from "./data/craData.js";
+import { updateLine, bar, drawAxes, drawBar } from "./graphFunctions.js";
+// import cra from "./data/craData.js";
 import { totalMdVolume } from "./data/dataPrep.js";
 import { per } from "./data/dataPrep.js";
 // import cow from "./data/dataPreprocessing";
 
 const changeEvents = {
-  lineGraph: 0,
-  barGraph: 1070,
+  // intro: drawAxes(totalMdVolume),
+  // year2006: drawBar(),
+  // year2007: drawBar(),
+  // year2008: drawBar(),
+  // year2009: drawBar(),
 };
 
 const scroller = scrollama();
@@ -19,7 +22,7 @@ var step = article.selectAll(".step");
 scroller
   .setup({
     step: "#scrolly article .step",
-    offset: 0.33,
+    offset: 0.63,
     debug: true,
   })
   .onStepEnter(handleStepEnter);
@@ -28,21 +31,26 @@ function handleStepEnter(resp) {
   const scrollPoz = window.scrollY;
 
   const currentStepId = resp.element.id;
-  const currentYear = parseInt(currentStepId.split("-")[1]);
+  const currentStepClass = resp.element.className;
+  const yearElement = currentStepClass.includes("year");
 
-  const dataToyear = totalMdVolume.filter((row) => row.date <= currentYear);
+  if (currentStepId === "intro") {
+    drawAxes(totalMdVolume);
+  }
 
-  bar(totalMdVolume, currentYear);
-  // bar(dataToyear);
+  let currentYear;
+  let dataToyear;
 
-  //   if (scrollPoz <= changeEvents.barGraph) {
-  //     updateLine(filteredData);
-  //     //   bar(rawDataGroup);
-  //   } else {
-  //     bar(rawDataGroup);
-  //     //   // update(filteredData);
-  //   }
+  if (yearElement) {
+    currentYear = parseInt(currentStepId.match(/\d+/g));
+    dataToyear = totalMdVolume.filter((row) => row.date <= currentYear);
+  }
+
+  if (yearElement) {
+    drawBar(totalMdVolume, currentYear);
+  }
+
+  // // changeEvents[currentStepId];
+
+  // // bar(totalMdVolume, currentYear);
 }
-
-// bar(totalMdVolume, 2015);
-// bar(totalMdVolume.filter((row) => row.date <= 2006));
