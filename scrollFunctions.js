@@ -1,13 +1,14 @@
 import {
   updateLine,
-  bar,
   drawAxes,
   drawSecondaryAxes,
   drawBar,
   removeBar,
+  stackedBarChart,
 } from "./graphFunctions.js";
 import { totalMdVolume } from "./data/dataPrep.js";
 import textStory from "./textStory.js";
+import { cra } from "./data/craData.js";
 
 const changeEvents = {
   intro: drawAxes,
@@ -39,28 +40,28 @@ scroller
   })
   .onStepEnter(handleStepEnter);
 
+// d3 stack data
+
 function handleStepEnter(resp) {
   const scrollPoz = window.scrollY;
 
   const currentStepId = resp.element.id;
   const currentStepClass = resp.element.className;
-  const yearElement = currentStepClass.includes("year");
+  const isYearElement = currentStepClass.includes("year");
 
   if (currentStepId === "intro") {
-    // drawAxes(totalMdVolume);
     changeEvents.intro(totalMdVolume);
-    // activateFunctions[0]();
   }
 
   let currentYear;
   let dataToyear;
 
-  if (yearElement) {
+  if (isYearElement) {
     currentYear = parseInt(currentStepId.match(/\d+/g));
     dataToyear = totalMdVolume.filter((row) => row.date <= currentYear);
   }
 
-  if (yearElement) {
+  if (isYearElement) {
     if (resp.direction === "down") {
       drawBar(totalMdVolume, currentYear);
     }
@@ -78,15 +79,24 @@ function handleStepEnter(resp) {
     renderedText.innerHTML = textStory[currentStepId];
   }, 500);
 
-  console.log(currentYear);
+  if (currentStepId === "classBreakdown") {
+    // changeEvents.intro(totalMdVolume);
 
-  if (currentYear === 2008) {
-    // d3.selectAll("#secondaryGraph").remove();
-    d3.selectAll(".secondary").remove();
-    drawSecondaryAxes(totalMdVolume);
-    // document.querySelector("#secondaryViz").innerHTML = "MORE STUFF";
+    // drawAxes(totalMdVolume);
+
+    d3.selectAll(".bar").remove();
+
+    stackedBarChart(cra, totalMdVolume);
   }
-  if (currentYear < 2008) {
-    d3.select("#secondaryGraph").remove();
-  }
+
+  // //SECONDARY GRAPH
+  // if (currentYear === 2008) {
+  //   // d3.selectAll("#secondaryGraph").remove();
+  //   d3.selectAll(".secondary").remove();
+  //   drawSecondaryAxes(totalMdVolume);
+  //   // document.querySelector("#secondaryViz").innerHTML = "MORE STUFF";
+  // }
+  // if (currentYear < 2008) {
+  //   d3.select("#secondaryGraph").remove();
+  // }
 }

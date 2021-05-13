@@ -15,6 +15,8 @@ const textStory = {
   year2018: "year2018",
   year2019: "year2019",
   year2020: "year2020",
+  classBreakdown: "class breakdown",
+  temp: "temp",
 };
 
 export default textStory;

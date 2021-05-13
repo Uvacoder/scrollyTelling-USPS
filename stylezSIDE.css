@@ -7,13 +7,6 @@
   padding: 1rem;
 }
 
-#scrolly > * {
-  /* -webkit-box-flex: 1;
-  -ms-flex: 1; */
-  /* flex: 0; */
-  /* flex-shrink: 2; */
-}
-
 #scrolly > #textStory {
   width: 30%;
 }

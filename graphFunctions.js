@@ -2,9 +2,10 @@ import {
   margin,
   width,
   height,
-  returnXScale,
-  returnYScale,
-  returnYAxisScale,
+  xScale,
+  xScaleInd,
+  yScale,
+  yScaleReverse,
 } from "./graphDimensions.js";
 
 export function drawAxes(data) {
@@ -22,17 +23,14 @@ export function drawAxes(data) {
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
     .attr("id", "primaryGraph");
 
-  const xAxis = d3
-    .axisBottom()
-    .scale(returnXScale(data))
-    .tickFormat(d3.format("d"));
+  const xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.format("d"));
   svg
     .append("g")
     .attr("transform", "translate(0," + height + ")")
     .attr("class", "myXaxis")
     .call(xAxis);
 
-  var yAxis = d3.axisLeft().scale(returnYAxisScale(data));
+  var yAxis = d3.axisLeft().scale(yScaleReverse);
   svg.append("g").attr("class", "myYaxis").call(yAxis);
 }
 
@@ -54,24 +52,19 @@ export function drawSecondaryAxes(data) {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  const xAxis = d3
-    .axisBottom()
-    .scale(returnXScale(data))
-    .tickFormat(d3.format("d"));
+  const xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.format("d"));
   svg
     .append("g")
     .attr("transform", "translate(0," + height + ")")
     .attr("class", "myXaxis")
     .call(xAxis);
 
-  var yAxis = d3.axisLeft().scale(returnYAxisScale(data));
+  var yAxis = d3.axisLeft().scale(yScale);
   svg.append("g").attr("class", "myYaxis").call(yAxis);
 }
 
 export function drawBar(data, currentYear) {
   // Initialise a X axis:
-  const xScale = returnXScale(data);
-  const yScale = returnYScale(data);
 
   const svg = d3.select("svg");
 
@@ -145,90 +138,155 @@ export function removeBar(data, currentYear) {
   barsRequired.map((year) => drawBar(data, year));
 }
 
-export function bar(data, currentYear) {
-  // d3.selectAll(".bar").transition().duration(1000).remove();
-  d3.selectAll(".bar").remove();
+export function stackedBarChart(cra, totalMdVolume) {
+  let classes = d3
+    .map(cra, function (d) {
+      return d.class;
+    })
+    .keys();
 
-  // d3.select(".myXaxis").remove();
-  // d3.select(".myYaxis").remove();
+  classes = classes.slice(0, 4);
 
-  d3.selectAll(".lineTest")
-    .transition()
-    .duration(1000)
-    .style("opacity", 0)
-    .remove();
+  let craFiltered = cra
+    .filter((row) => classes.includes(row.class))
+    .filter((row) => row.total === "yes");
 
-  // Initialise a X axis:
-  var x = d3.scaleLinear().range([0, width]).domain([2005, 2021]);
-  // var xAxis = d3.axisBottom().scale(x);
-  // svg
-  //   .append("g")
-  //   .attr("transform", "translate(0," + height + ")")
-  //   .attr("class", "myXaxis");
+  const colors = ["#4D9981", "#46E6B4", "#E6BA5C", "#6F2E99"];
 
-  // Initialize an Y axis
-  const y = d3.scaleLinear().range([0, height]).domain([100, 250]);
-  // const y = d3.scaleLinear().range([height, 0]);
+  const years = [
+    2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+    2018, 2019, 2020,
+  ];
 
-  // var yAxis = d3.axisLeft().scale(yAxisScale);
-  // svg.append("g").attr("class", "myYaxis");
+  const relavantCols = craFiltered.map((row) => {
+    return { fy: row.fy, class: row.class, vol: row.vol };
+  });
 
-  // x.domain([
-  //   d3.min(data, (d) => {
-  //     return d.date;
-  //   }),
-  //   d3.max(data, function (d) {
-  //     return d.date;
-  //   }),
-  // ]);
+  let preStack = [];
 
-  // svg.selectAll(".myXaxis").transition().duration(1000).call(xAxis);
+  for (let i = 0; i < years.length; i++) {
+    const thisYear = years[i];
+    const yearRows = relavantCols.filter((row) => row.fy === thisYear);
 
-  // y.domain([
-  //   d3.min(data, function (d) {
-  //     return d.value;
-  //   }),
-  //   d3.max(data, function (d) {
-  //     return d.value;
-  //   }),
-  // ]);
-  // svg.selectAll(".myYaxis").transition().duration(1000).call(yAxis);
+    const thisMM = yearRows.filter((row) => row.class == "MM")[0].vol;
+    const thisFC = yearRows.filter((row) => row.class == "FC")[0].vol;
+    const thisPER = yearRows.filter((row) => row.class == "PER")[0].vol;
+    const thisPS = yearRows.filter((row) => row.class == "PS")[0].vol;
 
-  // console.log(data);
+    preStack.push({
+      date: thisYear,
+      mm: thisMM,
+      fc: thisFC,
+      per: thisPER,
+      ps: thisPS,
+    });
+  }
 
-  const dataToyear = data.filter((row) => row.date <= currentYear);
+  const genStack = d3.stack().keys(["fc", "mm", "per", "ps"]);
 
-  console.log(dataToyear);
+  const stackedData = genStack(preStack);
 
+  const svg = d3.select("svg");
+
+  var color = d3
+    .scaleOrdinal()
+    .domain(["fc", "mm", "per", "ps"])
+    .range(["#e41a1c", "#377eb8", "#4daf4a", "#6F2E99"]);
+
+  // svg.attr("height", 400).attr("width", 400);
+
+  // Show the bars
   svg
-    .selectAll(".bar")
-    .data(dataToyear)
-    // .data(dataToyear)
+    .append("g")
+    .selectAll("g")
+    .data(stackedData)
+    .enter()
+    .append("g")
+    .attr("fill", function (d) {
+      return color(d.key);
+      // return "green";
+    })
+    .selectAll("rect")
+    // enter a second time = loop subgroup per subgroup to add all rectangles
+    .data(function (d) {
+      return d;
+    })
     .enter()
     .append("rect")
-    .attr("class", "bar")
     .attr("x", (d, i) => {
-      return x(d.date);
+      return xScaleInd(i);
     })
-    .attr("y", (d) => {
-      return height - y(d.value);
-    })
-    .attr("width", 10)
-    .attr("height", (d) => y(d.value))
-    .attr("fill", "black")
-    .attr("width", 10)
-    .attr("height", (d, i) => {
-      // return y(d.value);
-      return 0;
-    })
-    .attr("fill", "black")
-    .attr("id", (d) => d.value);
 
-  // d3.selectAll(".bar")
-  //   .attr("height", (d) => y(d.value))
-  //   .transition()
-  //   .duration(1000);
+    .attr("y", function (d) {
+      // return yScale(d[0]) - height;
+      // return yScale(d[1]) - yScale(d[0]);
+      // return yScale(d[0]) - yScale(d[1]) ;
+      // return height - yScale(d[0]);
+      // return yScale(d[0]) * -1;
+      // return yScale(d[1]);
+
+      // return yScale(d[0]);
+      // return yScaleReverse(d[0]);
+      // return yScaleReverse(d[1]) - yScaleReverse(d[0]);
+      // return yScale(d[1]) - yScale(d[0]);
+      // return height - (yScale(d[1]) - yScale(d[0]));
+      // return yScaleReverse(d[0]) - height;
+      // return yScaleReverse(d[1]) - height;
+      return yScaleReverse(d[1]);
+      // return height - (yScale(d[0]) - yScale(d[1]));
+      // return yScale(d[0]) - yScale(d[1]);
+      // return yScaleReverse(d[0]) - yScaleReverse(d[1]);
+    })
+    .attr("height", function (d) {
+      const diff = d[1] - d[0];
+      // return (yScale(d[0]) - yScale(d[1])) * -1;
+      // return yScale(d[0]) - yScale(d[1]);
+      return yScale(diff);
+      // return yScaleReverse(diff);
+      // return yScaleReverse(d[1]) - yScaleReverse(d[0]) ;
+      // return (yScaleReverse(d[1]) - yScaleReverse(d[0])) * -1;
+      // return (yScaleReverse(d[0]) - yScaleReverse(d[1])) * -1;
+      // return yScaleReverse(d[0]) - yScaleReverse(d[1]);
+      // return yScale(d[1]) - yScale(d[0]);
+      // return yScaleReverse(d[0] - d[1]);
+      // return yScaleReverse(d[0] - d[1]) * -1;
+      // return yScale(d[0] - d[1]) * -1;
+      // return yScale(d[0] - d[1]);
+      // return (yScale(d[1] - d[0]) * -1) / 3;
+      // return yScale(d[1]) - yScale(d[0]);
+      // return yScale(d[1]) - yScale(d[0]);
+      // return yScale(d[1]) - yScale(d[0]) * -1;
+      // return yAxisScale(d[0]) - yAxisScale(d[1]);
+    })
+    .attr("width", 10)
+    // .attr("transform", "translate(" + 50 + "," + -79 + ")")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    // .attr("transform", "translate(" + margin.left + "," + 136 + ")")
+    .attr("class", "bar")
+    .attr("id", (d) => {
+      return d[0];
+    });
+
+  // console.log(margin);
+
+  console.log(stackedData);
+
+  console.log("fullMD", yScale(213));
+  console.log("FC", yScale(97));
+  console.log("MM", yScale(102));
+  console.log("PER", yScale(9));
+  console.log("PS", yScale(1.1));
+
+  // console.log(
+  //   d3.min(totalMdVolume, function (d) {
+  //     return d.value;
+  //   })
+  // );
+
+  // console.log('all', )
 }
+
+export function classBars(data) {}
 
 // Create a function that takes a dataset as input and update the plot:
 export function updateLine(data) {
