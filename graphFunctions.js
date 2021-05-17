@@ -82,7 +82,7 @@ export function drawBar(data, currentYear) {
     .attr("fill", "black")
     .attr("id", `bar${thisYear}`)
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    .attr("class", "bar");
+    .attr("class", "bar  reg");
 
   d3.select(`#bar${thisYear}`)
     .transition()
@@ -91,7 +91,7 @@ export function drawBar(data, currentYear) {
 
   setTimeout(() => {
     d3.selectAll(".bar zero").attr("height", (data) => {
-      // return yScale(data.value);
+      return yScale(data.value);
     });
   }, 1150);
 }
@@ -111,12 +111,6 @@ export function removeBar(data, currentYear) {
     .attr("height", 0)
     .attr("class", "bar zero");
 
-  // setTimeout(() => {
-  //   d3.select(`#bar${currentYear}`).remove();
-  //   d3.select(`#bar${nextYear}`).remove();
-  // }, 1150);
-
-  //check for fast scrolling bars
   const allYears = [];
 
   const startYear = d3.min(data, (d) => {
@@ -136,6 +130,42 @@ export function removeBar(data, currentYear) {
   const barsRequired = allYears.slice(0, allYears.indexOf(currentYear) + 1);
 
   barsRequired.map((year) => drawBar(data, year));
+
+  console.log(barsRequired);
+}
+
+export function drawAllBars(data) {
+  const svg = d3.select("svg");
+
+  svg
+    .selectAll("rect")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("x", (d) => {
+      return xScale(d.date);
+    })
+    .attr("y", (d) => {
+      return yScaleReverse(d.value);
+    })
+    .attr("height", (d) => {
+      return yScale(d.value);
+      // return 100;
+    })
+    .attr("width", 10)
+    .attr("fill", "black")
+    .attr("id", (d) => {
+      return `bar${d.date}`;
+    })
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("class", "bar reg");
+
+  svg
+    .selectAll(".zero")
+    .classed("zero", false)
+    .attr("height", (d) => {
+      return yScale(d.value);
+    });
 }
 
 export function stackedBarChart(cra, totalMdVolume) {
@@ -193,9 +223,6 @@ export function stackedBarChart(cra, totalMdVolume) {
     .domain(["fc", "mm", "per", "ps"])
     .range(["#e41a1c", "#377eb8", "#4daf4a", "#6F2E99"]);
 
-  // svg.attr("height", 400).attr("width", 400);
-
-  // Show the bars
   svg
     .append("g")
     .selectAll("g")
@@ -204,10 +231,8 @@ export function stackedBarChart(cra, totalMdVolume) {
     .append("g")
     .attr("fill", function (d) {
       return color(d.key);
-      // return "green";
     })
     .selectAll("rect")
-    // enter a second time = loop subgroup per subgroup to add all rectangles
     .data(function (d) {
       return d;
     })
@@ -218,77 +243,31 @@ export function stackedBarChart(cra, totalMdVolume) {
     })
 
     .attr("y", function (d) {
-      // return yScale(d[0]) - height;
-      // return yScale(d[1]) - yScale(d[0]);
-      // return yScale(d[0]) - yScale(d[1]) ;
-      // return height - yScale(d[0]);
-      // return yScale(d[0]) * -1;
-      // return yScale(d[1]);
-
-      // return yScale(d[0]);
-      // return yScaleReverse(d[0]);
-      // return yScaleReverse(d[1]) - yScaleReverse(d[0]);
-      // return yScale(d[1]) - yScale(d[0]);
-      // return height - (yScale(d[1]) - yScale(d[0]));
-      // return yScaleReverse(d[0]) - height;
-      // return yScaleReverse(d[1]) - height;
       return yScaleReverse(d[1]);
-      // return height - (yScale(d[0]) - yScale(d[1]));
-      // return yScale(d[0]) - yScale(d[1]);
-      // return yScaleReverse(d[0]) - yScaleReverse(d[1]);
     })
     .attr("height", function (d) {
       const diff = d[1] - d[0];
-      // return (yScale(d[0]) - yScale(d[1])) * -1;
-      // return yScale(d[0]) - yScale(d[1]);
       return yScale(diff);
-      // return yScaleReverse(diff);
-      // return yScaleReverse(d[1]) - yScaleReverse(d[0]) ;
-      // return (yScaleReverse(d[1]) - yScaleReverse(d[0])) * -1;
-      // return (yScaleReverse(d[0]) - yScaleReverse(d[1])) * -1;
-      // return yScaleReverse(d[0]) - yScaleReverse(d[1]);
-      // return yScale(d[1]) - yScale(d[0]);
-      // return yScaleReverse(d[0] - d[1]);
-      // return yScaleReverse(d[0] - d[1]) * -1;
-      // return yScale(d[0] - d[1]) * -1;
-      // return yScale(d[0] - d[1]);
-      // return (yScale(d[1] - d[0]) * -1) / 3;
-      // return yScale(d[1]) - yScale(d[0]);
-      // return yScale(d[1]) - yScale(d[0]);
-      // return yScale(d[1]) - yScale(d[0]) * -1;
-      // return yAxisScale(d[0]) - yAxisScale(d[1]);
     })
     .attr("width", 10)
-    // .attr("transform", "translate(" + 50 + "," + -79 + ")")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    // .attr("transform", "translate(" + margin.left + "," + 136 + ")")
-    .attr("class", "bar")
+    .attr("class", "bar stacked")
     .attr("id", (d) => {
       return d[0];
-    });
-
-  // console.log(margin);
-
-  console.log(stackedData);
-
-  console.log("fullMD", yScale(213));
-  console.log("FC", yScale(97));
-  console.log("MM", yScale(102));
-  console.log("PER", yScale(9));
-  console.log("PS", yScale(1.1));
-
-  // console.log(
-  //   d3.min(totalMdVolume, function (d) {
-  //     return d.value;
-  //   })
-  // );
-
-  // console.log('all', )
+    })
+    .style("opacity", 0);
 }
 
-export function classBars(data) {}
+export function fadeBarsOut(barClass) {
+  barClass = `.${barClass}`;
+  d3.selectAll(barClass).transition().duration(1000).style("opacity", 0);
+}
 
-// Create a function that takes a dataset as input and update the plot:
+export function fadeBarsIn(barClass) {
+  barClass = `.${barClass}`;
+  d3.selectAll(barClass).transition().duration(1000).style("opacity", 1);
+}
+
 export function updateLine(data) {
   d3.selectAll(".bar").transition().duration(1000).style("opacity", 0).remove();
   d3.select(".myXaxis").remove();

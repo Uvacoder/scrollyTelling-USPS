@@ -5,6 +5,9 @@ import {
   drawBar,
   removeBar,
   stackedBarChart,
+  fadeBarsOut,
+  fadeBarsIn,
+  drawAllBars,
 } from "./graphFunctions.js";
 import { totalMdVolume } from "./data/dataPrep.js";
 import textStory from "./textStory.js";
@@ -13,12 +16,6 @@ import { cra } from "./data/craData.js";
 const changeEvents = {
   intro: drawAxes,
 };
-
-// const funcArray = [drawAxes];
-
-// const changeEvents = {
-//   intro: drawAxes,
-// };
 
 let activateFunctions = [];
 // activateFunctions[0] = drawBar();
@@ -64,6 +61,8 @@ function handleStepEnter(resp) {
   if (isYearElement) {
     if (resp.direction === "down") {
       drawBar(totalMdVolume, currentYear);
+
+      // drawAllBars(totalMdVolume);
     }
     if (resp.direction === "up") {
       removeBar(totalMdVolume, currentYear);
@@ -80,13 +79,25 @@ function handleStepEnter(resp) {
   }, 500);
 
   if (currentStepId === "classBreakdown") {
-    // changeEvents.intro(totalMdVolume);
+    if (resp.direction === "down") {
+      fadeBarsOut("bar");
 
-    // drawAxes(totalMdVolume);
+      setTimeout(() => {
+        stackedBarChart(cra, totalMdVolume);
+        fadeBarsIn("stacked");
+      }, 1000);
+    }
+    if (resp.direction === "up") {
+      fadeBarsOut("stacked");
 
-    d3.selectAll(".bar").remove();
+      setTimeout(() => {
+        drawAllBars(totalMdVolume);
+        fadeBarsIn("reg");
+      }, 1100);
 
-    stackedBarChart(cra, totalMdVolume);
+      // removeBar(totalMdVolume, 2020);
+      // drawBar(totalMdVolume, 2020);
+    }
   }
 
   // //SECONDARY GRAPH
