@@ -1,3 +1,4 @@
+import { totalMdVolume } from "./data/dataPrep.js";
 import {
   margin,
   width,
@@ -94,6 +95,8 @@ export function drawBar(data, currentYear) {
       return yScale(data.value);
     });
   }, 1150);
+
+  removedStackedbars();
 }
 
 export function removeBar(data, currentYear) {
@@ -111,6 +114,10 @@ export function removeBar(data, currentYear) {
     .attr("height", 0)
     .attr("class", "bar zero");
 
+  removedStackedbars();
+}
+
+export function fillMissingBars(data, currentYear) {
   const allYears = [];
 
   const startYear = d3.min(data, (d) => {
@@ -125,14 +132,48 @@ export function removeBar(data, currentYear) {
     allYears.push(i);
   }
 
-  const barsExisting = d3.selectAll(".bar")._groups[0];
-
   const barsRequired = allYears.slice(0, allYears.indexOf(currentYear) + 1);
 
-  barsRequired.map((year) => drawBar(data, year));
+  const barElementsExisting = d3.selectAll(".bar")._groups[0];
 
-  console.log(barsRequired);
+  const barYearsExisting = Array.from(barElementsExisting).map((node) =>
+    parseInt(node.id.match(/\d+/g))
+  );
+
+  let barsMissing = [];
+
+  barsRequired.map((year) => {
+    if (!barYearsExisting.includes(year)) {
+      barsMissing.push(year);
+    }
+  });
+
+  barsMissing.map((year) => drawBar(totalMdVolume, year));
+
+  const allBarHeights = Array.from(barElementsExisting).map(
+    (node) => node.attributes[2].nodeValue
+  );
+
+  const yearAndHeight = {};
+  for (let i = 0; i < barYearsExisting.length; i++) {
+    const aYear = barYearsExisting[i];
+
+    if (allBarHeights[i] === "0") {
+      const dataToyear = totalMdVolume.filter(
+        // (row) => row.date === parseString(aYear)
+        (row) => row.date === parseInt(aYear)
+      );
+      const thisValue = dataToyear[0].value;
+
+      d3.select(`#bar${aYear}`)
+        .transition()
+        .duration(1000)
+        .attr("height", yScale(thisValue));
+    }
+  }
 }
+
+export function removeDuplicateBars() {}
 
 export function drawAllBars(data) {
   const svg = d3.select("svg");
@@ -256,6 +297,19 @@ export function stackedBarChart(cra, totalMdVolume) {
       return d[0];
     })
     .style("opacity", 0);
+}
+
+export function removedStackedbars() {
+  d3.selectAll(".stacked").remove();
+  d3.selectAll(".reg").style("opacity", 1);
+}
+
+export function cleanupZeroBars() {
+  d3.selectAll(".zero").transition().duration(1000).attr("height", 0);
+
+  setTimeout(() => {
+    d3.selectAll(".zero").remove();
+  }, 1000);
 }
 
 export function fadeBarsOut(barClass) {

@@ -8,6 +8,8 @@ import {
   fadeBarsOut,
   fadeBarsIn,
   drawAllBars,
+  cleanupZeroBars,
+  fillMissingBars,
 } from "./graphFunctions.js";
 import { totalMdVolume } from "./data/dataPrep.js";
 import textStory from "./textStory.js";
@@ -61,11 +63,15 @@ function handleStepEnter(resp) {
   if (isYearElement) {
     if (resp.direction === "down") {
       drawBar(totalMdVolume, currentYear);
+      fillMissingBars(totalMdVolume, currentYear);
 
       // drawAllBars(totalMdVolume);
     }
     if (resp.direction === "up") {
       removeBar(totalMdVolume, currentYear);
+      cleanupZeroBars();
+
+      fillMissingBars(totalMdVolume, currentYear);
     }
   }
 
@@ -85,7 +91,7 @@ function handleStepEnter(resp) {
       setTimeout(() => {
         stackedBarChart(cra, totalMdVolume);
         fadeBarsIn("stacked");
-      }, 1000);
+      }, 500);
     }
     if (resp.direction === "up") {
       fadeBarsOut("stacked");
@@ -93,10 +99,7 @@ function handleStepEnter(resp) {
       setTimeout(() => {
         drawAllBars(totalMdVolume);
         fadeBarsIn("reg");
-      }, 1100);
-
-      // removeBar(totalMdVolume, 2020);
-      // drawBar(totalMdVolume, 2020);
+      }, 500);
     }
   }
 
