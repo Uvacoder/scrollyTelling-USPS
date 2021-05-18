@@ -81,3 +81,5 @@ export function bar(data, currentYear) {
     .attr("fill", "black")
     .attr("id", (d) => d.value);
 }
+
+const craFilt = [];

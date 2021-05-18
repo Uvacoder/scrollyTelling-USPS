@@ -251,7 +251,7 @@ export function stackedBarChart(cra, totalMdVolume) {
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
     .attr("class", (d) => {
       let barYear = d.data.date;
-      if (barYear === 2006 || barYear === 2020) {
+      if (barYear === 2008 || barYear === 2020) {
         return `bar stacked outside`;
       } else {
         return `bar stacked inside`;
@@ -310,6 +310,16 @@ export function middleBarsDownFinalState() {
 }
 
 export function forceChart() {
+  d3.selectAll(".stacked").remove();
+
+  d3.select(".myXaxis").transition().duration(1000).style("opacity", 0);
+  d3.select(".myYaxis").transition().duration(1000).style("opacity", 0);
+
+  // setTimeout(() => {
+  //   d3.select(".myXaxis").remove();
+  //   d3.select(".myYaxis").remove();
+  // }, 1000);
+
   let craFilt = craFiltInital;
 
   let aggregateVolume = 0;
@@ -323,13 +333,16 @@ export function forceChart() {
     //   aggregateVolume = aggregateVolume - 163;
     // }
 
-    aggregateVolumeWithMargin += aggregateVolume + 2;
+    aggregateVolumeWithMargin = aggregateVolume + i * 3.2;
+    // aggregateVolumeWithMargin +=
 
     currentElement.aggregateVolume = aggregateVolume;
+    currentElement.aggregateVolumeWithMargin = aggregateVolumeWithMargin;
   }
 
   // craFilt[0].prevYPoz = 0;
   craFilt[0].aggregateVolume = 0;
+  craFilt[0].aggregateVolumeWithMargin = 0;
 
   console.log(craFilt);
 
@@ -341,28 +354,18 @@ export function forceChart() {
     .enter()
     .append("rect")
     .attr("x", (d) => {
-      if (d.fy === 2008) {
-        return 100;
-      }
-      if (d.fy === 2020) {
-        return 300;
-      }
+      return xScale(d.fy) + margin.left;
     })
     .attr("y", (d) => {
       let yPoz = yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolume);
-      // let yPoz = yScale(d.vol) + yScale(d.aggregateVolume);
 
       if (d.fy === 2008) {
         return yPoz - 200;
-        // return yPoz;
       } else {
-        // return yPoz - 200;
         return yPoz;
       }
     })
     .attr("height", (d) => {
-      // return yScale(d.vol) / 3;
-      // return yScale(d.vol);
       return yScale(d.vol);
     })
     .attr("width", 10)
@@ -383,23 +386,26 @@ export function forceChart() {
     .attr("class", "force")
     .attr("id", (d) => d.name);
 
-  d3.selectAll(".stacked").remove();
+  d3.selectAll(".force")
+    .transition()
+    .duration(2000)
+    .attr("height", (d) => {
+      return yScale(d.vol);
+    })
+    .attr("y", (d) => {
+      let yPozForce =
+        yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolumeWithMargin);
 
-  //   d3.selectAll(".force")
-  //     .transition()
-  //     .duration(2000)
-  //     .attr("height", (d) => {
-  //       return yScale(d.vol);
-  //     })
-  //     .attr("y", (d) => {
-  //       if (d.fy === 2006) {
-  //         return yScale(d.aggregateVolumeWithMargin - 163);
-  //       } else {
-  //         return yScale(d.aggregateVolumeWithMargin);
-  //       }
-  //     })
-  //     .attr("width", 20)
-  //     .style("margin-top", 10);
+      if (d.fy === 2008) {
+        // return yScaleReverse(d.aggregateVolumeWithMargin);
+        return yPozForce - 100 - 50;
+      } else {
+        // return yScaleReverse(d.aggregateVolumeWithMargin);
+        return yPozForce + 100 - 50;
+      }
+    })
+    .attr("width", 20)
+    .style("margin-top", 10);
 }
 
 export function updateLine(data) {
