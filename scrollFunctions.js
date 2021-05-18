@@ -10,10 +10,13 @@ import {
   drawAllBars,
   cleanupZeroBars,
   fillMissingBars,
+  middleBarsDown,
+  middleBarsDownFinalState,
+  forceChart,
 } from "./graphFunctions.js";
 import { totalMdVolume } from "./data/dataPrep.js";
 import textStory from "./textStory.js";
-import { cra } from "./data/craData.js";
+import cra from "./data/craData.js";
 
 const changeEvents = {
   intro: drawAxes,
@@ -101,16 +104,41 @@ function handleStepEnter(resp) {
         fadeBarsIn("reg");
       }, 500);
     }
+
+    setTimeout(() => {
+      stackedBarChart(cra, totalMdVolume);
+    }, 1000);
   }
 
-  // //SECONDARY GRAPH
-  // if (currentYear === 2008) {
-  //   // d3.selectAll("#secondaryGraph").remove();
-  //   d3.selectAll(".secondary").remove();
-  //   drawSecondaryAxes(totalMdVolume);
-  //   // document.querySelector("#secondaryViz").innerHTML = "MORE STUFF";
-  // }
-  // if (currentYear < 2008) {
-  //   d3.select("#secondaryGraph").remove();
-  // }
+  if (currentStepId === "firstAndLast") {
+    if (resp.direction === "down") {
+      middleBarsDown();
+
+      setTimeout(() => {
+        middleBarsDownFinalState();
+      }, 1800);
+    }
+
+    if (resp.direction === "up") {
+      setTimeout(() => {
+        middleBarsDownFinalState();
+      }, 1800);
+    }
+  }
+
+  if (currentStepId === "productLevel") {
+    forceChart();
+  }
 }
+
+// //SECONDARY GRAPH
+// if (currentYear === 2008) {
+//   // d3.selectAll("#secondaryGraph").remove();
+//   d3.selectAll(".secondary").remove();
+//   drawSecondaryAxes(totalMdVolume);
+//   // document.querySelector("#secondaryViz").innerHTML = "MORE STUFF";
+// }
+// if (currentYear < 2008) {
+//   d3.select("#secondaryGraph").remove();
+// }
+// }

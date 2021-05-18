@@ -9,6 +9,11 @@ import {
   yScaleReverse,
 } from "./graphDimensions.js";
 
+import cra from "./data/craData.js";
+import craFiltInital from "./data/craFiltered.js";
+
+import { stackData } from "./data/dataPrep.js";
+
 export function drawAxes(data) {
   d3.select("svg").remove();
   d3.select(".myXaxis").remove();
@@ -154,7 +159,6 @@ export function fillMissingBars(data, currentYear) {
     (node) => node.attributes[2].nodeValue
   );
 
-  const yearAndHeight = {};
   for (let i = 0; i < barYearsExisting.length; i++) {
     const aYear = barYearsExisting[i];
 
@@ -172,8 +176,6 @@ export function fillMissingBars(data, currentYear) {
     }
   }
 }
-
-export function removeDuplicateBars() {}
 
 export function drawAllBars(data) {
   const svg = d3.select("svg");
@@ -210,52 +212,7 @@ export function drawAllBars(data) {
 }
 
 export function stackedBarChart(cra, totalMdVolume) {
-  let classes = d3
-    .map(cra, function (d) {
-      return d.class;
-    })
-    .keys();
-
-  classes = classes.slice(0, 4);
-
-  let craFiltered = cra
-    .filter((row) => classes.includes(row.class))
-    .filter((row) => row.total === "yes");
-
-  const colors = ["#4D9981", "#46E6B4", "#E6BA5C", "#6F2E99"];
-
-  const years = [
-    2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
-    2018, 2019, 2020,
-  ];
-
-  const relavantCols = craFiltered.map((row) => {
-    return { fy: row.fy, class: row.class, vol: row.vol };
-  });
-
-  let preStack = [];
-
-  for (let i = 0; i < years.length; i++) {
-    const thisYear = years[i];
-    const yearRows = relavantCols.filter((row) => row.fy === thisYear);
-
-    const thisMM = yearRows.filter((row) => row.class == "MM")[0].vol;
-    const thisFC = yearRows.filter((row) => row.class == "FC")[0].vol;
-    const thisPER = yearRows.filter((row) => row.class == "PER")[0].vol;
-    const thisPS = yearRows.filter((row) => row.class == "PS")[0].vol;
-
-    preStack.push({
-      date: thisYear,
-      mm: thisMM,
-      fc: thisFC,
-      per: thisPER,
-      ps: thisPS,
-    });
-  }
-
-  const genStack = d3.stack().keys(["fc", "mm", "per", "ps"]);
-
-  const stackedData = genStack(preStack);
+  const stackedData = stackData(cra, totalMdVolume);
 
   const svg = d3.select("svg");
 
@@ -292,11 +249,21 @@ export function stackedBarChart(cra, totalMdVolume) {
     })
     .attr("width", 10)
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    .attr("class", "bar stacked")
+    .attr("class", (d) => {
+      let barYear = d.data.date;
+      if (barYear === 2006 || barYear === 2020) {
+        return `bar stacked outside`;
+      } else {
+        return `bar stacked inside`;
+      }
+    })
     .attr("id", (d) => {
       return d[0];
+      // return d.data.date;
     })
     .style("opacity", 0);
+
+  // console.log(stackedData);
 }
 
 export function removedStackedbars() {
@@ -320,6 +287,119 @@ export function fadeBarsOut(barClass) {
 export function fadeBarsIn(barClass) {
   barClass = `.${barClass}`;
   d3.selectAll(barClass).transition().duration(1000).style("opacity", 1);
+}
+
+export function middleBarsDown() {
+  d3.selectAll(".inside")
+    .transition()
+    .duration(1750)
+    .attr("height", 0)
+    .attr("class", "bar stacked inside zero");
+
+  setTimeout(() => {
+    d3.selectAll(".zero").remove();
+    d3.selectAll(".reg").remove();
+  }, 1750);
+}
+
+export function middleBarsDownFinalState() {
+  // dont do it this way just run the full stack function then middle bars down
+
+  stackedBarChart(cra, totalMdVolume);
+  middleBarsDown();
+}
+
+export function forceChart() {
+  let craFilt = craFiltInital;
+
+  let aggregateVolume = 0;
+  let aggregateVolumeWithMargin = 0;
+
+  for (let i = 1; i < craFilt.length; i++) {
+    const previousElement = craFilt[i - 1];
+    const currentElement = craFilt[i];
+    aggregateVolume += previousElement.vol;
+    // if (currentElement.fy === 2006 && currentElement.name === "spLetters") {
+    //   aggregateVolume = aggregateVolume - 163;
+    // }
+
+    aggregateVolumeWithMargin += aggregateVolume + 2;
+
+    currentElement.aggregateVolume = aggregateVolume;
+  }
+
+  // craFilt[0].prevYPoz = 0;
+  craFilt[0].aggregateVolume = 0;
+
+  console.log(craFilt);
+
+  const svg = d3.select("svg");
+
+  svg
+    .selectAll(".force")
+    .data(craFilt)
+    .enter()
+    .append("rect")
+    .attr("x", (d) => {
+      if (d.fy === 2008) {
+        return 100;
+      }
+      if (d.fy === 2020) {
+        return 300;
+      }
+    })
+    .attr("y", (d) => {
+      let yPoz = yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolume);
+      // let yPoz = yScale(d.vol) + yScale(d.aggregateVolume);
+
+      if (d.fy === 2008) {
+        return yPoz - 200;
+        // return yPoz;
+      } else {
+        // return yPoz - 200;
+        return yPoz;
+      }
+    })
+    .attr("height", (d) => {
+      // return yScale(d.vol) / 3;
+      // return yScale(d.vol);
+      return yScale(d.vol);
+    })
+    .attr("width", 10)
+    .attr("fill", (d) => {
+      if (d.class === "FC") {
+        return "#e41a1c";
+      }
+      if (d.class === "MM") {
+        return "#377eb8";
+      }
+      if (d.class === "PER") {
+        return "#4daf4a";
+      }
+      if (d.class === "PS") {
+        return "#6F2E99";
+      }
+    })
+    .attr("class", "force")
+    .attr("id", (d) => d.name);
+
+  d3.selectAll(".stacked").remove();
+
+  //   d3.selectAll(".force")
+  //     .transition()
+  //     .duration(2000)
+  //     .attr("height", (d) => {
+  //       return yScale(d.vol);
+  //     })
+  //     .attr("y", (d) => {
+  //       if (d.fy === 2006) {
+  //         return yScale(d.aggregateVolumeWithMargin - 163);
+  //       } else {
+  //         return yScale(d.aggregateVolumeWithMargin);
+  //       }
+  //     })
+  //     .attr("width", 20)
+  //     .style("margin-top", 10);
 }
 
 export function updateLine(data) {

@@ -16,7 +16,9 @@ const textStory = {
   year2019: "year2019",
   year2020: "year2020",
   classBreakdown: "class breakdown",
-  temp: "temp",
+  firstAndLast: "first and last years",
+  productLevel: "Product Level",
+  step: "temp",
 };
 
 export default textStory;
