@@ -44,7 +44,6 @@ export function drawAxes(data) {
   svg.append("g").attr("class", "myYaxis").call(yAxis);
 
   lastCalledEvent = "drawAxes";
-  console.log(lastCalledEvent);
 }
 
 export function drawSecondaryAxes(data) {
@@ -83,8 +82,6 @@ export function drawBar(totalMdVolume, currentYear) {
   const svg = d3.select("svg");
 
   const dataToyear = totalMdVolume.filter((row) => row.date === currentYear);
-
-  console.log(dataToyear);
 
   const thisYear = dataToyear[0].date;
   const thisValue = dataToyear[0].value;
@@ -337,15 +334,97 @@ export function middleBarsDown() {
 }
 
 export function forceChartReverse() {
-  const craOutsideYears = cra.filter(
-    (row) => row.fy === 2008 || row.fy === 2020
-  );
+  let craFilt = craFiltInital;
 
-  // console.log(craOutsideYears);
-  const stackedData = stackData(craOutsideYears, "outsideYears");
+  let aggregateVolume = 0;
+  let aggregateVolumeWithMargin = 0;
 
-  console.log(stackedData);
-  d3.selectAll(".force").transition().duration(1000).attr("width", barWidth);
+  for (let i = 1; i < craFilt.length; i++) {
+    const previousElement = craFilt[i - 1];
+    const currentElement = craFilt[i];
+    aggregateVolume += previousElement.vol;
+    // if (currentElement.fy === 2006 && currentElement.name === "spLetters") {
+    //   aggregateVolume = aggregateVolume - 163;
+    // }
+
+    aggregateVolumeWithMargin = aggregateVolume + i * 3.2;
+    // aggregateVolumeWithMargin +=
+
+    currentElement.aggregateVolume = aggregateVolume;
+    currentElement.aggregateVolumeWithMargin = aggregateVolumeWithMargin;
+  }
+
+  // craFilt[0].prevYPoz = 0;
+  craFilt[0].aggregateVolume = 0;
+  craFilt[0].aggregateVolumeWithMargin = 0;
+
+  // console.log(craFilt);
+
+  const svg = d3.select("svg");
+
+  d3.selectAll(".force").remove();
+
+  svg
+    // .selectAll(".force")
+    .selectAll(".stacked")
+    .data(craFilt)
+    .enter()
+    .append("rect")
+    .attr("x", (d) => {
+      return xScale(d.fy) + margin.left;
+    })
+    .attr("y", (d) => {
+      let yPozForce =
+        yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolumeWithMargin);
+
+      if (d.fy === 2008) {
+        // return yScaleReverse(d.aggregateVolumeWithMargin);
+        return yPozForce - 100 - 50;
+      } else {
+        // return yScaleReverse(d.aggregateVolumeWithMargin);
+        return yPozForce + 100 - 50;
+      }
+    })
+    .attr("height", (d) => {
+      return yScale(d.vol);
+    })
+    .attr("width", forceWidth)
+    .attr("fill", (d) => {
+      if (d.class === "FC") {
+        return "#e41a1c";
+      }
+      if (d.class === "MM") {
+        return "#377eb8";
+      }
+      if (d.class === "PER") {
+        return "#4daf4a";
+      }
+      if (d.class === "PS") {
+        return "#6F2E99";
+      }
+    })
+    .attr("class", "stacked")
+    .attr("id", (d) => d.name);
+
+  d3.selectAll(".stacked")
+    .transition()
+    .duration(2000)
+    .attr("height", (d) => {
+      return yScale(d.vol);
+    })
+    .attr("y", (d) => {
+      let yPoz = yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolume);
+
+      if (d.fy === 2008) {
+        return yPoz - 200;
+      } else {
+        return yPoz;
+      }
+    })
+    .attr("width", barWidth)
+    .style("margin-top", 10);
+
+  lastCalledEvent = `ForceChartReverse`;
 }
 
 export function middleBarsDownReverse() {
