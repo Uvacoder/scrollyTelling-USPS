@@ -5,6 +5,8 @@ import { totalMdVolume } from "./data/dataPrep.js";
 export const margin = { top: 10, right: 30, bottom: 30, left: 50 };
 export const width = 460 - margin.left - margin.right;
 export const height = 250 - margin.top - margin.bottom;
+export const barWidth = 10;
+export const forceWidth = 20;
 
 export const xScale = d3
   .scaleLinear()

@@ -83,3 +83,85 @@ export function bar(data, currentYear) {
 }
 
 const craFilt = [];
+
+function handleStepEnterDELETE(resp) {
+  const scrollPoz = window.scrollY;
+
+  const currentStepId = resp.element.id;
+  const currentStepClass = resp.element.className;
+  const isYearElement = currentStepClass.includes("year");
+
+  if (currentStepId === "intro") {
+    changeEventsDownard.intro(totalMdVolume);
+  }
+
+  let currentYear;
+  let dataToyear;
+
+  if (isYearElement) {
+    currentYear = parseInt(currentStepId.match(/\d+/g));
+    dataToyear = totalMdVolume.filter((row) => row.date <= currentYear);
+  }
+
+  if (isYearElement) {
+    if (resp.direction === "down") {
+      drawBar(totalMdVolume, currentYear);
+
+      // console.log(current)
+
+      // drawAllBars(totalMdVolume);
+    }
+    if (resp.direction === "up") {
+      removeBar(totalMdVolume, currentYear);
+      cleanupZeroBars();
+
+      fillMissingBars(totalMdVolume, currentYear);
+    }
+  }
+
+  const renderedText = document.querySelector("#renderedText");
+
+  renderedText.className = "fadeOut";
+
+  setTimeout(() => {
+    renderedText.className = "fadeIn";
+    renderedText.innerHTML = textStory[currentStepId];
+  }, 500);
+
+  if (currentStepId === "classBreakdown") {
+    if (resp.direction === "down") {
+      fadeBarsOut("bar");
+    }
+    if (resp.direction === "up") {
+      fadeBarsOut("stacked");
+    }
+
+    // setTimeout(() => {
+    //   stackedBarChart(cra);
+    // }, 1000);
+  }
+
+  if (currentStepId === "firstAndLast") {
+    console.log(resp.direction);
+
+    if (resp.direction === "down") {
+      middleBarsDown();
+
+      setTimeout(() => {
+        middleBarsDownFinalState();
+      }, 1800);
+    }
+
+    if (resp.direction === "up") {
+      // setTimeout(() => {
+      //   middleBarsDownFinalState();
+      // }, 1800);
+
+      middleBarsDownReverse();
+    }
+  }
+
+  if (currentStepId === "productLevel") {
+    forceChart();
+  }
+}

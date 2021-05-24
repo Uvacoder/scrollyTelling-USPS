@@ -7,12 +7,16 @@ import {
   xScaleInd,
   yScale,
   yScaleReverse,
+  forceWidth,
+  barWidth,
 } from "./graphDimensions.js";
 
 import cra from "./data/craData.js";
 import craFiltInital from "./data/craFiltered.js";
 
 import { stackData } from "./data/dataPrep.js";
+
+let lastCalledEvent;
 
 export function drawAxes(data) {
   d3.select("svg").remove();
@@ -38,6 +42,9 @@ export function drawAxes(data) {
 
   var yAxis = d3.axisLeft().scale(yScaleReverse);
   svg.append("g").attr("class", "myYaxis").call(yAxis);
+
+  lastCalledEvent = "drawAxes";
+  console.log(lastCalledEvent);
 }
 
 export function drawSecondaryAxes(data) {
@@ -69,12 +76,15 @@ export function drawSecondaryAxes(data) {
   svg.append("g").attr("class", "myYaxis").call(yAxis);
 }
 
-export function drawBar(data, currentYear) {
+export function drawBar(totalMdVolume, currentYear) {
+  // export function drawBar(currentYear) {
   // Initialise a X axis:
 
   const svg = d3.select("svg");
 
-  const dataToyear = data.filter((row) => row.date === currentYear);
+  const dataToyear = totalMdVolume.filter((row) => row.date === currentYear);
+
+  console.log(dataToyear);
 
   const thisYear = dataToyear[0].date;
   const thisValue = dataToyear[0].value;
@@ -101,6 +111,15 @@ export function drawBar(data, currentYear) {
     });
   }, 1150);
 
+  lastCalledEvent = `Bar${currentYear}`;
+  // console.log(lastCalledEvent);
+
+  // export { lastCalledEvent };
+  // export const lastCalledEvent
+  // const lastCalledConsant = lastCalledEvent
+
+  // export const lastCalledEventConst = lastCalledConsant;
+
   removedStackedbars();
 }
 
@@ -118,6 +137,10 @@ export function removeBar(data, currentYear) {
     .duration(1000)
     .attr("height", 0)
     .attr("class", "bar zero");
+
+  lastCalledEvent = `Bar${currentYear}`;
+
+  // console.log(lastCalledEvent);
 
   removedStackedbars();
 }
@@ -211,8 +234,8 @@ export function drawAllBars(data) {
     });
 }
 
-export function stackedBarChart(cra, totalMdVolume) {
-  const stackedData = stackData(cra, totalMdVolume);
+export function stackedBarChart(cra, craFilterType) {
+  const stackedData = stackData(cra, craFilterType);
 
   const svg = d3.select("svg");
 
@@ -263,7 +286,9 @@ export function stackedBarChart(cra, totalMdVolume) {
     })
     .style("opacity", 0);
 
-  // console.log(stackedData);
+  lastCalledEvent = `stackedBar`;
+
+  // console.log(lastCalledEvent);
 }
 
 export function removedStackedbars() {
@@ -282,11 +307,17 @@ export function cleanupZeroBars() {
 export function fadeBarsOut(barClass) {
   barClass = `.${barClass}`;
   d3.selectAll(barClass).transition().duration(1000).style("opacity", 0);
+
+  lastCalledEvent = `fadeBarsOut`;
+  // console.log(lastCalledEvent);
 }
 
 export function fadeBarsIn(barClass) {
   barClass = `.${barClass}`;
   d3.selectAll(barClass).transition().duration(1000).style("opacity", 1);
+
+  lastCalledEvent = `fadeBarsIn`;
+  // console.log(lastCalledEvent);
 }
 
 export function middleBarsDown() {
@@ -300,12 +331,63 @@ export function middleBarsDown() {
     d3.selectAll(".zero").remove();
     d3.selectAll(".reg").remove();
   }, 1750);
+
+  lastCalledEvent = `middleBarsDown`;
+  // console.log(lastCalledEvent);
+}
+
+export function forceChartReverse() {
+  const craOutsideYears = cra.filter(
+    (row) => row.fy === 2008 || row.fy === 2020
+  );
+
+  // console.log(craOutsideYears);
+  const stackedData = stackData(craOutsideYears, "outsideYears");
+
+  console.log(stackedData);
+  d3.selectAll(".force").transition().duration(1000).attr("width", barWidth);
+}
+
+export function middleBarsDownReverse() {
+  // const craMiddleYears = cra.filter(
+  //   (row) => row.fy !== 2008 && row.fy !== 2020
+  // );
+
+  // const craMiddleYears = cra;
+
+  const stackedData = stackData(cra, "middleYears");
+
+  stackedBarChart(cra, "middleYears");
+
+  d3.selectAll(".inside").style("opacity", 1).attr("height", 0);
+
+  d3.selectAll(".inside")
+    .transition()
+    .duration(1000)
+    .attr("height", (d) => {
+      const diff = d[1] - d[0];
+      return yScale(diff);
+    });
+
+  // console.log("totalMdVolumeMiddle");
+
+  // d3.selectAll(".inside")
+  //   .transition()
+  //   .duration(1750)
+  //   .attr("height", 0)
+  //   .attr("class", "bar stacked inside zero");
+
+  // setTimeout(() => {
+  //   d3.selectAll(".zero").remove();
+  //   d3.selectAll(".reg").remove();
+  // }, 1750);
+
+  lastCalledEvent = `middleBarsDown`;
+  // console.log(lastCalledEvent);
 }
 
 export function middleBarsDownFinalState() {
-  // dont do it this way just run the full stack function then middle bars down
-
-  stackedBarChart(cra, totalMdVolume);
+  stackedBarChart(cra);
   middleBarsDown();
 }
 
@@ -315,10 +397,10 @@ export function forceChart() {
   d3.select(".myXaxis").transition().duration(1000).style("opacity", 0);
   d3.select(".myYaxis").transition().duration(1000).style("opacity", 0);
 
-  // setTimeout(() => {
-  //   d3.select(".myXaxis").remove();
-  //   d3.select(".myYaxis").remove();
-  // }, 1000);
+  setTimeout(() => {
+    d3.select(".myXaxis").remove();
+    d3.select(".myYaxis").remove();
+  }, 1000);
 
   let craFilt = craFiltInital;
 
@@ -344,7 +426,7 @@ export function forceChart() {
   craFilt[0].aggregateVolume = 0;
   craFilt[0].aggregateVolumeWithMargin = 0;
 
-  console.log(craFilt);
+  // console.log(craFilt);
 
   const svg = d3.select("svg");
 
@@ -404,8 +486,11 @@ export function forceChart() {
         return yPozForce + 100 - 50;
       }
     })
-    .attr("width", 20)
+    .attr("width", forceWidth)
     .style("margin-top", 10);
+
+  lastCalledEvent = `ForceChart`;
+  // console.log(lastCalledEvent);
 }
 
 export function updateLine(data) {
@@ -472,3 +557,6 @@ export function updateLine(data) {
     .attr("stroke", "steelblue")
     .attr("stroke-width", 2.5);
 }
+
+// export const lastCalledEvent
+export { lastCalledEvent };

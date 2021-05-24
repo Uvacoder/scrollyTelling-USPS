@@ -24,7 +24,7 @@ export { totalMdVolume };
 
 const per = cra.filter((row) => row.class == "PER");
 
-export function stackData(cra, totalMdVolume) {
+export function stackData(cra, craFilterType) {
   let classes = d3
     .map(cra, function (d) {
       return d.class;
@@ -39,10 +39,18 @@ export function stackData(cra, totalMdVolume) {
 
   const colors = ["#4D9981", "#46E6B4", "#E6BA5C", "#6F2E99"];
 
-  const years = [
+  let years = [
     2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
     2018, 2019, 2020,
   ];
+
+  if (craFilterType === "middleYears") {
+    years = years.filter((year) => year !== 2008 && year !== 2020);
+  }
+
+  if (craFilterType === "outsideYears") {
+    years = years.filter((year) => year === 2008 || year === 2020);
+  }
 
   const relavantCols = craFiltered.map((row) => {
     return { fy: row.fy, class: row.class, vol: row.vol };
@@ -71,6 +79,8 @@ export function stackData(cra, totalMdVolume) {
   const genStack = d3.stack().keys(["fc", "mm", "per", "ps"]);
 
   const stackedData = genStack(preStack);
+
+  console.log(stackedData);
 
   return stackedData;
 }

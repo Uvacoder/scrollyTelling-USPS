@@ -13,14 +13,17 @@ import {
   middleBarsDown,
   middleBarsDownFinalState,
   forceChart,
+  lastCalledEvent,
+  middleBarsDownReverse,
+  forceChartReverse,
 } from "./graphFunctions.js";
 import { totalMdVolume } from "./data/dataPrep.js";
 import textStory from "./textStory.js";
 import cra from "./data/craData.js";
 
-const changeEvents = {
-  intro: drawAxes,
-};
+import { changeEventsDownard } from "./stepFunctionsDownard.js";
+
+import { changeEventsUpward } from "./stepFunctionsUpward.js";
 
 let activateFunctions = [];
 // activateFunctions[0] = drawBar();
@@ -47,13 +50,11 @@ scroller
 function handleStepEnter(resp) {
   const scrollPoz = window.scrollY;
 
+  let scrollDirection = resp.direction;
+
   const currentStepId = resp.element.id;
   const currentStepClass = resp.element.className;
   const isYearElement = currentStepClass.includes("year");
-
-  if (currentStepId === "intro") {
-    changeEvents.intro(totalMdVolume);
-  }
 
   let currentYear;
   let dataToyear;
@@ -63,18 +64,37 @@ function handleStepEnter(resp) {
     dataToyear = totalMdVolume.filter((row) => row.date <= currentYear);
   }
 
-  if (isYearElement) {
-    if (resp.direction === "down") {
-      drawBar(totalMdVolume, currentYear);
-      fillMissingBars(totalMdVolume, currentYear);
-
-      // drawAllBars(totalMdVolume);
+  if (scrollDirection === "down") {
+    if (currentStepId === "intro") {
+      changeEventsDownard.intro(totalMdVolume);
     }
-    if (resp.direction === "up") {
-      removeBar(totalMdVolume, currentYear);
-      cleanupZeroBars();
 
-      fillMissingBars(totalMdVolume, currentYear);
+    if (isYearElement) {
+      // changeEventsDownard.year2006(totalMdVolume, currentYear);
+      changeEventsDownard[currentStepId](totalMdVolume, currentYear);
+    }
+
+    if (
+      ["classBreakdown", "firstAndLast", "productLevel"].includes(currentStepId)
+    ) {
+      changeEventsDownard[currentStepId]();
+    }
+  }
+
+  if (scrollDirection === "up") {
+    if (currentStepId === "intro") {
+      changeEventsUpward.intro(totalMdVolume);
+    }
+
+    if (isYearElement) {
+      // changeEventsDownard.year2006(totalMdVolume, currentYear);
+      changeEventsUpward[currentStepId](totalMdVolume, currentYear);
+    }
+
+    if (
+      ["classBreakdown", "firstAndLast", "productLevel"].includes(currentStepId)
+    ) {
+      changeEventsUpward[currentStepId]();
     }
   }
 
@@ -86,49 +106,6 @@ function handleStepEnter(resp) {
     renderedText.className = "fadeIn";
     renderedText.innerHTML = textStory[currentStepId];
   }, 500);
-
-  if (currentStepId === "classBreakdown") {
-    if (resp.direction === "down") {
-      fadeBarsOut("bar");
-
-      setTimeout(() => {
-        stackedBarChart(cra, totalMdVolume);
-        fadeBarsIn("stacked");
-      }, 500);
-    }
-    if (resp.direction === "up") {
-      fadeBarsOut("stacked");
-
-      setTimeout(() => {
-        drawAllBars(totalMdVolume);
-        fadeBarsIn("reg");
-      }, 500);
-    }
-
-    setTimeout(() => {
-      stackedBarChart(cra, totalMdVolume);
-    }, 1000);
-  }
-
-  if (currentStepId === "firstAndLast") {
-    if (resp.direction === "down") {
-      middleBarsDown();
-
-      setTimeout(() => {
-        middleBarsDownFinalState();
-      }, 1800);
-    }
-
-    if (resp.direction === "up") {
-      setTimeout(() => {
-        middleBarsDownFinalState();
-      }, 1800);
-    }
-  }
-
-  if (currentStepId === "productLevel") {
-    forceChart();
-  }
 }
 
 // //SECONDARY GRAPH
