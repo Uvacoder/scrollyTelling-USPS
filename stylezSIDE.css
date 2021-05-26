@@ -25,14 +25,14 @@ article {
   /* width: 100%; */
   width: 50%;
   height: 100%;
+  margin-top: 2rem;
 
-  margin: 0;
   /* -webkit-transform: translate3d(0, 0, 0);
   -moz-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0); */
   background-color: #cbcebe;
   z-index: 0;
-  top: 0;
+  top: 2rem;
 }
 
 .fadeIn {

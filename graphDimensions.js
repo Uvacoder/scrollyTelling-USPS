@@ -2,9 +2,9 @@
 
 import { totalMdVolume } from "./data/dataPrep.js";
 
-export const margin = { top: 10, right: 30, bottom: 30, left: 50 };
-export const width = 460 - margin.left - margin.right;
-export const height = 250 - margin.top - margin.bottom;
+export const margin = { top: 50, right: 80, bottom: 30, left: 70, barTop: 20 };
+export const width = 550 - margin.left - margin.right;
+export const height = 450 - margin.top - margin.bottom;
 export const barWidth = 10;
 export const forceWidth = 20;
 
@@ -24,9 +24,6 @@ export const yScaleReverse = d3
   .scaleLinear()
   .range([height, 0])
   .domain([
-    // d3.min(totalMdVolume, function (d) {
-    //   return d.value;
-    // }),
     0,
     d3.max(totalMdVolume, function (d) {
       return d.value;

@@ -16,34 +16,44 @@ import craFiltInital from "./data/craFiltered.js";
 
 import { stackData } from "./data/dataPrep.js";
 
-let lastCalledEvent;
-
-export function drawAxes(data) {
-  d3.select("svg").remove();
-  d3.select(".myXaxis").remove();
-  d3.select(".myYaxis").remove();
-
-  // append the svg object to the body of the page
+export function createSVG() {
   const svg = d3
     .select("#primaryViz")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
+    .attr("height", height + margin.top + margin.bottom);
+}
+
+export function drawAxes(data) {
+  // d3.select("svg").remove();
+  d3.select(".myXaxis").remove();
+  d3.select(".myYaxis").remove();
+
+  // append the svg object to the body of the page
+
+  const svg = d3.select("svg");
+  svg
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    // .attr("transform", "translate(" - 500 + "," + margin.top + ")")
     .attr("id", "primaryGraph");
 
   const xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.format("d"));
+
   svg
     .append("g")
-    .attr("transform", "translate(0," + height + ")")
+    // .attr("transform", "translate(0," + height + ")")
     .attr("class", "myXaxis")
-    .call(xAxis);
+    .call(xAxis)
+    .attr("transform", `translate(${margin.left}, ${height})`);
+  // .attr("transform", `translate(${margin.left}, ${height})`);
 
   var yAxis = d3.axisLeft().scale(yScaleReverse);
-  svg.append("g").attr("class", "myYaxis").call(yAxis);
-
-  lastCalledEvent = "drawAxes";
+  svg
+    .append("g")
+    .attr("class", "myYaxis")
+    .call(yAxis)
+    .attr("transform", `translate(${margin.left}, 0)`);
 }
 
 export function drawSecondaryAxes(data) {
@@ -94,7 +104,7 @@ export function drawBar(totalMdVolume, currentYear) {
     .attr("width", 10)
     .attr("fill", "black")
     .attr("id", `bar${thisYear}`)
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("transform", "translate(" + margin.left + "," + 0 + ")")
     .attr("class", "bar  reg");
 
   d3.select(`#bar${thisYear}`)
@@ -107,15 +117,6 @@ export function drawBar(totalMdVolume, currentYear) {
       return yScale(data.value);
     });
   }, 1150);
-
-  lastCalledEvent = `Bar${currentYear}`;
-  // console.log(lastCalledEvent);
-
-  // export { lastCalledEvent };
-  // export const lastCalledEvent
-  // const lastCalledConsant = lastCalledEvent
-
-  // export const lastCalledEventConst = lastCalledConsant;
 
   removedStackedbars();
 }
@@ -134,10 +135,6 @@ export function removeBar(data, currentYear) {
     .duration(1000)
     .attr("height", 0)
     .attr("class", "bar zero");
-
-  lastCalledEvent = `Bar${currentYear}`;
-
-  // console.log(lastCalledEvent);
 
   removedStackedbars();
 }
@@ -213,14 +210,13 @@ export function drawAllBars(data) {
     })
     .attr("height", (d) => {
       return yScale(d.value);
-      // return 100;
     })
     .attr("width", 10)
     .attr("fill", "black")
     .attr("id", (d) => {
       return `bar${d.date}`;
     })
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("transform", `translate(${margin.left} +${margin.barTop - 20})`)
     .attr("class", "bar reg");
 
   svg
@@ -244,12 +240,14 @@ export function stackedBarChart(cra, craFilterType) {
   svg
     .append("g")
     .selectAll("g")
+
     .data(stackedData)
     .enter()
     .append("g")
     .attr("fill", function (d) {
       return color(d.key);
     })
+    .attr("class", "stackGroup")
     .selectAll("rect")
     .data(function (d) {
       return d;
@@ -257,7 +255,7 @@ export function stackedBarChart(cra, craFilterType) {
     .enter()
     .append("rect")
     .attr("x", (d, i) => {
-      return xScaleInd(i);
+      return xScale(d.data.date);
     })
 
     .attr("y", function (d) {
@@ -268,7 +266,7 @@ export function stackedBarChart(cra, craFilterType) {
       return yScale(diff);
     })
     .attr("width", 10)
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("transform", "translate(" + margin.left + "," + 0 + ")")
     .attr("class", (d) => {
       let barYear = d.data.date;
       if (barYear === 2008 || barYear === 2020) {
@@ -280,12 +278,8 @@ export function stackedBarChart(cra, craFilterType) {
     .attr("id", (d) => {
       return d[0];
       // return d.data.date;
-    })
-    .style("opacity", 0);
-
-  lastCalledEvent = `stackedBar`;
-
-  // console.log(lastCalledEvent);
+    });
+  // .style("opacity", 0);
 }
 
 export function removedStackedbars() {
@@ -304,17 +298,11 @@ export function cleanupZeroBars() {
 export function fadeBarsOut(barClass) {
   barClass = `.${barClass}`;
   d3.selectAll(barClass).transition().duration(1000).style("opacity", 0);
-
-  lastCalledEvent = `fadeBarsOut`;
-  // console.log(lastCalledEvent);
 }
 
 export function fadeBarsIn(barClass) {
   barClass = `.${barClass}`;
   d3.selectAll(barClass).transition().duration(1000).style("opacity", 1);
-
-  lastCalledEvent = `fadeBarsIn`;
-  // console.log(lastCalledEvent);
 }
 
 export function middleBarsDown() {
@@ -324,13 +312,11 @@ export function middleBarsDown() {
     .attr("height", 0)
     .attr("class", "bar stacked inside zero");
 
-  setTimeout(() => {
-    d3.selectAll(".zero").remove();
-    d3.selectAll(".reg").remove();
-  }, 1750);
-
-  lastCalledEvent = `middleBarsDown`;
-  // console.log(lastCalledEvent);
+  // setTimeout(() => {
+  //   d3.selectAll(".zero").remove();
+  //   d3.selectAll(".reg").remove();
+  //   d3.selectAll(".inside").remove();
+  // }, 1750);
 }
 
 export function forceChartReverse() {
@@ -347,7 +333,7 @@ export function forceChartReverse() {
     //   aggregateVolume = aggregateVolume - 163;
     // }
 
-    aggregateVolumeWithMargin = aggregateVolume + i * 3.2;
+    aggregateVolumeWithMargin = aggregateVolume + i * 3;
     // aggregateVolumeWithMargin +=
 
     currentElement.aggregateVolume = aggregateVolume;
@@ -379,14 +365,14 @@ export function forceChartReverse() {
 
       if (d.fy === 2008) {
         // return yScaleReverse(d.aggregateVolumeWithMargin);
-        return yPozForce - 100 - 50;
+        return yPozForce - 275;
       } else {
         // return yScaleReverse(d.aggregateVolumeWithMargin);
-        return yPozForce + 100 - 50;
+        return yPozForce + 150;
       }
     })
     .attr("height", (d) => {
-      return yScale(d.vol);
+      return yScale(d.vol) * 0.8;
     })
     .attr("width", forceWidth)
     .attr("fill", (d) => {
@@ -413,10 +399,11 @@ export function forceChartReverse() {
       return yScale(d.vol);
     })
     .attr("y", (d) => {
-      let yPoz = yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolume);
+      let yPoz =
+        yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolume) - margin.barTop;
 
       if (d.fy === 2008) {
-        return yPoz - 200;
+        return yPoz - 350;
       } else {
         return yPoz;
       }
@@ -424,7 +411,12 @@ export function forceChartReverse() {
     .attr("width", barWidth)
     .style("margin-top", 10);
 
-  lastCalledEvent = `ForceChartReverse`;
+  setTimeout(() => {
+    d3.selectAll(".stacked").remove();
+
+    stackedBarChart(cra, "outsideYears");
+    d3.selectAll(".stacked").style("opacity", 1);
+  }, 2000);
 }
 
 export function middleBarsDownReverse() {
@@ -460,9 +452,6 @@ export function middleBarsDownReverse() {
   //   d3.selectAll(".zero").remove();
   //   d3.selectAll(".reg").remove();
   // }, 1750);
-
-  lastCalledEvent = `middleBarsDown`;
-  // console.log(lastCalledEvent);
 }
 
 export function middleBarsDownFinalState() {
@@ -470,12 +459,26 @@ export function middleBarsDownFinalState() {
   middleBarsDown();
 }
 
-export function forceChart() {
+export function removeAxesFade() {
   d3.selectAll(".stacked").remove();
 
   d3.select(".myXaxis").transition().duration(1000).style("opacity", 0);
   d3.select(".myYaxis").transition().duration(1000).style("opacity", 0);
+}
 
+export function drawAxesFade() {
+  drawAxes();
+
+  d3.select(".myXaxis").style("opacity", 0);
+  d3.select(".myYaxis").style("opacity", 0);
+
+  d3.select(".myXaxis").transition().duration(1000).style("opacity", 1);
+  d3.select(".myYaxis").transition().duration(1000).style("opacity", 1);
+}
+
+// export function
+
+export function forceChart() {
   setTimeout(() => {
     d3.select(".myXaxis").remove();
     d3.select(".myYaxis").remove();
@@ -490,12 +493,8 @@ export function forceChart() {
     const previousElement = craFilt[i - 1];
     const currentElement = craFilt[i];
     aggregateVolume += previousElement.vol;
-    // if (currentElement.fy === 2006 && currentElement.name === "spLetters") {
-    //   aggregateVolume = aggregateVolume - 163;
-    // }
 
-    aggregateVolumeWithMargin = aggregateVolume + i * 3.2;
-    // aggregateVolumeWithMargin +=
+    aggregateVolumeWithMargin = aggregateVolume + i * 3;
 
     currentElement.aggregateVolume = aggregateVolume;
     currentElement.aggregateVolumeWithMargin = aggregateVolumeWithMargin;
@@ -518,10 +517,11 @@ export function forceChart() {
       return xScale(d.fy) + margin.left;
     })
     .attr("y", (d) => {
-      let yPoz = yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolume);
+      let yPoz =
+        yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolume) - margin.barTop;
 
       if (d.fy === 2008) {
-        return yPoz - 200;
+        return yPoz - 350;
       } else {
         return yPoz;
       }
@@ -551,25 +551,20 @@ export function forceChart() {
     .transition()
     .duration(2000)
     .attr("height", (d) => {
-      return yScale(d.vol);
+      return yScale(d.vol) * 0.8;
     })
     .attr("y", (d) => {
       let yPozForce =
         yScaleReverse(d.vol) + yScaleReverse(d.aggregateVolumeWithMargin);
 
       if (d.fy === 2008) {
-        // return yScaleReverse(d.aggregateVolumeWithMargin);
-        return yPozForce - 100 - 50;
+        return yPozForce - 275;
       } else {
-        // return yScaleReverse(d.aggregateVolumeWithMargin);
-        return yPozForce + 100 - 50;
+        return yPozForce + 150;
       }
     })
     .attr("width", forceWidth)
     .style("margin-top", 10);
-
-  lastCalledEvent = `ForceChart`;
-  // console.log(lastCalledEvent);
 }
 
 export function updateLine(data) {
@@ -636,6 +631,3 @@ export function updateLine(data) {
     .attr("stroke", "steelblue")
     .attr("stroke-width", 2.5);
 }
-
-// export const lastCalledEvent
-export { lastCalledEvent };

@@ -1,5 +1,4 @@
 import {
-  updateLine,
   drawAxes,
   drawSecondaryAxes,
   drawBar,
@@ -13,7 +12,6 @@ import {
   middleBarsDown,
   middleBarsDownFinalState,
   forceChart,
-  lastCalledEvent,
   middleBarsDownReverse,
   forceChartReverse,
 } from "./graphFunctions.js";
@@ -37,6 +35,54 @@ var scrolly = main.select("#scrolly");
 var article = scrolly.select("article");
 var step = article.selectAll(".step");
 
+const allStepTriggers = [
+  "intro",
+  "year2006",
+  "year2008",
+  "year2009",
+  "year2010",
+  "year2011",
+  "year2012",
+  "year2013",
+  "year2014",
+  "year2015",
+  "year2016",
+  "year2017",
+  "year2018",
+  "year2019",
+  "year2020",
+  "classBreakdown",
+  "firstAndLast",
+  "productLevel",
+];
+
+// function currentStepVLastCalled(){
+function eventDifferenceSnip(currentStepId, lastCalledEvent) {
+  let snipOutput;
+
+  const currentStepIndex = allStepTriggers.indexOf(currentStepId);
+  const lastCalledIndex = allStepTriggers.indexOf(lastCalledEvent);
+
+  console.log(currentStepId, lastCalledEvent);
+  // console.log(currentStepIndex, lastCalledIndex);
+
+  if (lastCalledIndex > currentStepIndex) {
+    snipOutput = allStepTriggers.slice(currentStepIndex, lastCalledIndex);
+
+    console.log(snipOutput);
+  }
+  if (lastCalledEvent < currentStepIndex) {
+    snipOutput = allStepTriggers.slice(lastCalledIndex, currentStepIndex);
+    snipOutput.reverse();
+    console.log(snipOutput);
+  }
+}
+
+// let t;
+// function recordStep(lastCalledEvent, currentStepId) {
+//   lastCalledEvent = currentStepId;
+// }
+
 scroller
   .setup({
     step: "#scrolly article .step",
@@ -48,6 +94,8 @@ scroller
 // d3 stack data
 
 function handleStepEnter(resp) {
+  let lastCalledEvent = "bob";
+
   const scrollPoz = window.scrollY;
 
   let scrollDirection = resp.direction;
@@ -70,8 +118,14 @@ function handleStepEnter(resp) {
     }
 
     if (isYearElement) {
-      // changeEventsDownard.year2006(totalMdVolume, currentYear);
       changeEventsDownard[currentStepId](totalMdVolume, currentYear);
+
+      // clearTimeout(t);
+      // t = setTimeout(() => {
+      //   recordStep(lastCalledEvent, currentStepId);
+      // }, 1000);
+
+      // console.log(lastCalledEvent, currentStepId);
     }
 
     if (
@@ -79,6 +133,11 @@ function handleStepEnter(resp) {
     ) {
       changeEventsDownard[currentStepId]();
     }
+
+    // if (currentStepId === "classBreakdown")
+    //   // console.log("triggered atscroll functions ");
+    //   // changeEventsDownard[`${classBreakdown}`]();
+    //   changeEventsDownard[`classBreakdown`]();
   }
 
   if (scrollDirection === "up") {
@@ -87,7 +146,6 @@ function handleStepEnter(resp) {
     }
 
     if (isYearElement) {
-      // changeEventsDownard.year2006(totalMdVolume, currentYear);
       changeEventsUpward[currentStepId](totalMdVolume, currentYear);
     }
 
@@ -107,15 +165,3 @@ function handleStepEnter(resp) {
     renderedText.innerHTML = textStory[currentStepId];
   }, 500);
 }
-
-// //SECONDARY GRAPH
-// if (currentYear === 2008) {
-//   // d3.selectAll("#secondaryGraph").remove();
-//   d3.selectAll(".secondary").remove();
-//   drawSecondaryAxes(totalMdVolume);
-//   // document.querySelector("#secondaryViz").innerHTML = "MORE STUFF";
-// }
-// if (currentYear < 2008) {
-//   d3.select("#secondaryGraph").remove();
-// }
-// }

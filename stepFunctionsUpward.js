@@ -1,5 +1,4 @@
 import {
-  updateLine,
   drawAxes,
   drawSecondaryAxes,
   drawBar,
@@ -13,9 +12,10 @@ import {
   middleBarsDown,
   middleBarsDownFinalState,
   forceChart,
-  lastCalledEvent,
   middleBarsDownReverse,
   forceChartReverse,
+  drawAxesFade,
+  createSVG,
 } from "./graphFunctions.js";
 import { totalMdVolume } from "./data/dataPrep.js";
 import textStory from "./textStory.js";
@@ -39,15 +39,49 @@ export const changeEventsUpward = {
   year2019: removeBar,
   year2020: removeBar,
   classBreakdown: fromStackedToReg,
-  firstAndLast: middleBarsDownReverse,
-  productLevel: forceChartReverse,
+  firstAndLast: firstAndLastFunctions,
+  productLevel: forceChartReverseAll,
 };
 
 function fromStackedToReg() {
-  fadeBarsOut("stacked");
-  drawAllBars(totalMdVolume);
-  fadeBarsIn("reg");
+  d3.select("svg").remove();
 
-  //include cleanup functions heere
-  //   include laststep functions here
+  createSVG();
+  drawAxes();
+
+  drawAllBars(totalMdVolume);
+  d3.selectAll(".reg").style("opacity", 0);
+
+  d3.selectAll(".reg").transition().duration(500).style("opacity", 1);
+
+  stackedBarChart(cra, "allYears");
+  d3.selectAll(".stacked").style("opacity", 1);
+
+  d3.selectAll(".stacked").transition().duration(500).style("opacity", 0);
+}
+
+function firstAndLastFunctions() {
+  d3.select("svg").remove();
+
+  createSVG();
+  drawAxes();
+
+  stackedBarChart(cra, "outsideYears");
+  d3.selectAll(".bar").style("opacity", 1);
+
+  // stacked bar chart middle years only
+
+  // stackedBarChart(cra, "middleYears");
+  // d3.selectAll(".middle").attr("height", 0);
+
+  // d3.selectAll(".middle").transition().duration(1000)
+  //initialize with height 0
+  // then middlebardown reverse
+
+  middleBarsDownReverse();
+}
+
+function forceChartReverseAll() {
+  forceChartReverse();
+  drawAxesFade();
 }

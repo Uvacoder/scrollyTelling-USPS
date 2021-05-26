@@ -80,7 +80,5 @@ export function stackData(cra, craFilterType) {
 
   const stackedData = genStack(preStack);
 
-  console.log(stackedData);
-
   return stackedData;
 }
