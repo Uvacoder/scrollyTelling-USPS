@@ -15,6 +15,8 @@ import {
   forceMatch,
   defaultForceColors,
   highlightForceColors,
+  tooltipMatch,
+  defaultClassColors,
 } from "./data/forceMatch.js";
 import cra from "./data/craData.js";
 import craFiltInital from "./data/craFiltered.js";
@@ -597,14 +599,6 @@ export function forceChart() {
       forceBlockMouseOut(d);
     });
 
-  let xPoz;
-  let yPoz;
-
-  document.addEventListener("mousemove", (e) => {
-    xPoz = e.clientX;
-    yPoz = e.clientY;
-  });
-
   function forceBlockMouseover(d) {
     let rectId;
     if (d.date) {
@@ -619,11 +613,51 @@ export function forceChart() {
 
     d3.select("#tooltip")
       .attr("class", "visible")
-      .attr("x", xPoz)
-      .attr("y", yPoz);
-    // .attr(`transform`, `translate(${xPoz}, ${yPoz})`);
+      .style("left", d3.event.pageX - 1150 + "px")
+      .style("top", d3.event.pageY - window.scrollY - 50 + "px");
 
-    console.log(d3.select("#tooltip"));
+    const tooltip = document.querySelector("#tooltip");
+
+    const tooltipMatchRow = tooltipMatch.filter(
+      (row) => row.productName === rectId
+    );
+
+    // const classRow = document.querySelector("#classRow");
+
+    const classStrip = tooltipMatchRow[0].class.replace(/\s/g, "");
+
+    const classAbbrevObj = {
+      FirstClass: "fc",
+      MarketingMail: "mm",
+      PackageServices: "ps",
+      Periodicals: "per",
+    };
+
+    const classAbrev = classAbbrevObj[classStrip];
+
+    // classRow.style.color = defaultClassColors.classAbrev;
+
+    console.log(defaultClassColors[0]["fc"]);
+    tooltip.innerHTML = `<table>
+    <tr>
+    <td>Mail Class: </td> <td id=classRow style="color: ${
+      defaultClassColors[0][`${classAbrev}`]
+    } ">${tooltipMatchRow[0].class}</td>
+    </tr>
+    <tr>
+    <td>Product: </td> <td>${tooltipMatchRow[0].fullName}</td>
+    </tr>
+    <tr>
+    <td>Percent Decline: </td> <td>${Math.round(
+      tooltipMatchRow[0].pctDecline * 100,
+      0
+    )}%</td>
+    </tr>
+    <tr>
+    <td>Absolute Decline (M): </td> <td>${tooltipMatchRow[0].absDecline}</td>
+    </tr>
+    
+    </table>`;
   }
 
   function forceBlockMouseOut(d) {

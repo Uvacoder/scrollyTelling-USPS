@@ -116,6 +116,13 @@ article {
   height: 500px;
 }
 
+#tooltip {
+  position: absolute;
+  background-color: #b6b1b1;
+  border-radius: 5px;
+  font-size: small;
+}
+
 .hidden {
   visibility: hidden;
 }
