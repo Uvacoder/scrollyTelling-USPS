@@ -523,6 +523,9 @@ export function forceChart() {
 
   const svg = d3.select("svg");
 
+  svg.append("text").text("2008").attr("x", 80).attr("y", 20);
+  svg.append("text").text("2020").attr("x", 400).attr("y", 20);
+
   svg
     .selectAll(".force")
     .data(craFilt)
@@ -654,7 +657,7 @@ export function forceChart() {
     )}%</td>
     </tr>
     <tr>
-    <td>Absolute Decline (M): </td> <td>${tooltipMatchRow[0].absDecline}</td>
+    <td>Absolute Decline (M):</td> <td>${tooltipMatchRow[0].absDecline}</td>
     </tr>
     
     </table>`;

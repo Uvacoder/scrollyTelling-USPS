@@ -30,7 +30,7 @@ article {
   /* -webkit-transform: translate3d(0, 0, 0);
   -moz-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0); */
-  background-color: #cbcebe;
+  /* background-color: #cbcebe; */
   z-index: 0;
   top: 2rem;
 }
@@ -69,7 +69,7 @@ article {
   top: 33%;
   width: 50px !important;
   height: 100px;
-  background-color: teal;
+  background-color: rgb(116, 216, 208);
 }
 
 #allGraphs {
@@ -118,9 +118,10 @@ article {
 
 #tooltip {
   position: absolute;
-  background-color: #b6b1b1;
+  background-color: #d1cccc;
   border-radius: 5px;
   font-size: small;
+  box-shadow: 5px 5px 5px rgb(107, 122, 122);
 }
 
 .hidden {
