@@ -93,16 +93,4 @@ function fromRegToStacked() {
   d3.selectAll(".stacked").style("opacity", 0);
 
   d3.selectAll(".stacked").transition().duration(500).style("opacity", 1);
-
-  // d3.selectAll(".bar").remove();
-
-  // fadeBarsOut("reg");
-  // stackedBarChart(cra, "allYears");
-  // d3.selectAll(".stacked").style("opacity", 0);
-
-  // fadeBarsIn("stacked");
-
-  // setTimeout(() => {
-  //   d3.selectAll(".reg").remove();
-  // }, 900);
 }

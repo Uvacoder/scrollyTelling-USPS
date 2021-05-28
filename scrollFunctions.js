@@ -78,11 +78,6 @@ function eventDifferenceSnip(currentStepId, lastCalledEvent) {
   }
 }
 
-// let t;
-// function recordStep(lastCalledEvent, currentStepId) {
-//   lastCalledEvent = currentStepId;
-// }
-
 scroller
   .setup({
     step: "#scrolly article .step",

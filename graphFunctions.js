@@ -11,6 +11,11 @@ import {
   barWidth,
 } from "./graphDimensions.js";
 
+import {
+  forceMatch,
+  defaultForceColors,
+  highlightForceColors,
+} from "./data/forceMatch.js";
 import cra from "./data/craData.js";
 import craFiltInital from "./data/craFiltered.js";
 
@@ -506,6 +511,14 @@ export function forceChart() {
 
   // console.log(craFilt);
 
+  d3.select("svg").remove();
+
+  createSVG();
+
+  drawAxes();
+
+  d3.select("g").remove();
+
   const svg = d3.select("svg");
 
   svg
@@ -513,6 +526,12 @@ export function forceChart() {
     .data(craFilt)
     .enter()
     .append("rect")
+    .on("mouseover", (d) => {
+      // console.log("bro");
+      // console.log(d.name);
+      console.log(d);
+      // console.log(d3.select(this));
+    })
     .attr("x", (d) => {
       return xScale(d.fy) + margin.left;
     })
@@ -547,11 +566,13 @@ export function forceChart() {
     .attr("class", "force")
     .attr("id", (d) => d.name);
 
-  d3.selectAll(".force")
+  const forceBlocks = d3.selectAll(".force");
+
+  forceBlocks
     .transition()
     .duration(2000)
     .attr("height", (d) => {
-      return yScale(d.vol) * 0.8;
+      return yScale(d.vol) * 0.8 + 1;
     })
     .attr("y", (d) => {
       let yPozForce =
@@ -565,6 +586,60 @@ export function forceChart() {
     })
     .attr("width", forceWidth)
     .style("margin-top", 10);
+
+  console.log(craFilt);
+
+  forceBlocks
+    .on("mouseover", (d) => {
+      forceBlockMouseover(d);
+    })
+    .on("mouseout", (d) => {
+      forceBlockMouseOut(d);
+    });
+
+  let xPoz;
+  let yPoz;
+
+  document.addEventListener("mousemove", (e) => {
+    xPoz = e.clientX;
+    yPoz = e.clientY;
+  });
+
+  function forceBlockMouseover(d) {
+    let rectId;
+    if (d.date) {
+      rectId = forceMatch[0][d.date];
+    }
+    if (d.fy) {
+      rectId = d.name;
+    }
+    d3.selectAll(`#${rectId}`).attr("fill", () => {
+      return highlightForceColors[0][rectId];
+    });
+
+    d3.select("#tooltip")
+      .attr("class", "visible")
+      .attr("x", xPoz)
+      .attr("y", yPoz);
+    // .attr(`transform`, `translate(${xPoz}, ${yPoz})`);
+
+    console.log(d3.select("#tooltip"));
+  }
+
+  function forceBlockMouseOut(d) {
+    let rectId;
+    if (d.date) {
+      rectId = forceMatch[0][d.date];
+    }
+    if (d.fy) {
+      rectId = d.name;
+    }
+    d3.selectAll(`#${rectId}`).attr("fill", (d) => {
+      return defaultForceColors[0][rectId];
+    });
+
+    d3.select("#tooltip").attr("class", "hidden");
+  }
 }
 
 export function updateLine(data) {
