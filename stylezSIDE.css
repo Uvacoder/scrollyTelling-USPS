@@ -1,3 +1,8 @@
+body {
+  font-family: "Roboto", sans-serif;
+  src: url("https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap");
+}
+
 #scrolly {
   position: relative;
   display: -webkit-box;
@@ -25,14 +30,9 @@ article {
   /* width: 100%; */
   width: 50%;
   height: 100%;
-  margin-top: 2rem;
-
-  /* -webkit-transform: translate3d(0, 0, 0);
-  -moz-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0); */
-  /* background-color: #cbcebe; */
+  margin-top: 5rem;
   z-index: 0;
-  top: 2rem;
+  top: 6rem;
 }
 
 .fadeIn {
@@ -68,8 +68,10 @@ article {
   z-index: 0;
   top: 33%;
   width: 50px !important;
-  height: 100px;
-  background-color: rgb(116, 216, 208);
+  height: 150px;
+  background-color: rgba(126, 223, 215, 0.801);
+  border-radius: 5px;
+  padding-left: 1%;
 }
 
 #allGraphs {
@@ -78,14 +80,8 @@ article {
   transform: translate(-25%, 15%);
 }
 
-#secondaryViz {
-  width: 100px;
-  height: 100px;
-
-  background-color: red;
-  /* flex: 1; */
-  /* transform: translate(-75%, 475%); */
-  /* margin-right: -100px; */
+#graphTitle {
+  margin-left: 30%;
 }
 
 */ .step {
@@ -116,6 +112,10 @@ article {
   height: 500px;
 }
 
+#productLevel {
+  margin-bottom: 250%;
+}
+
 #tooltip {
   position: absolute;
   background-color: #d1cccc;
@@ -130,4 +130,18 @@ article {
 
 .visible {
   visibility: visible;
+}
+
+#fcTextTable {
+  color: #e41a1c;
+}
+
+#mmTextTable {
+  color: #377eb8;
+}
+#perTextTable {
+  color: #4daf4a;
+}
+#psTextTable {
+  color: #6f2e99;
 }

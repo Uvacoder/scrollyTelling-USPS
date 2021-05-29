@@ -87,10 +87,10 @@ function fromRegToStacked() {
   drawAllBars(totalMdVolume);
   d3.selectAll(".reg").style("opacity", 1);
 
-  d3.selectAll(".reg").transition().duration(500).style("opacity", 0);
+  d3.selectAll(".reg").transition().duration(1500).style("opacity", 0);
 
   stackedBarChart(cra, "allYears");
   d3.selectAll(".stacked").style("opacity", 0);
 
-  d3.selectAll(".stacked").transition().duration(500).style("opacity", 1);
+  d3.selectAll(".stacked").transition().duration(1500).style("opacity", 1);
 }

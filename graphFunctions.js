@@ -677,6 +677,10 @@ export function forceChart() {
 
     d3.select("#tooltip").attr("class", "hidden");
   }
+
+  setTimeout(() => {
+    d3.selectAll(".stacked").remove();
+  }, 2000);
 }
 
 export function updateLine(data) {
