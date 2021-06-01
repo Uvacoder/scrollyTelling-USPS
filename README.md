@@ -8,4 +8,4 @@ Towards the bottom of the page, the visualization gets more detailed displaying 
 
 It looks like this
 
-![Alt text](printScreen.png?raw=true "Title")
+![Screenshot](printScreen.png "Title")
