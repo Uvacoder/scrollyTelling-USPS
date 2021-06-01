@@ -81,7 +81,7 @@ function eventDifferenceSnip(currentStepId, lastCalledEvent) {
 scroller
   .setup({
     step: "#scrolly article .step",
-    offset: 0.63,
+    offset: 0.55,
     // debug: true,
   })
   .onStepEnter(handleStepEnter);

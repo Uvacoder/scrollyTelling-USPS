@@ -105,7 +105,7 @@ article {
 }
 
 .step {
-  margin-top: 150px;
+  margin-top: 200px;
 }
 
 #footer {
@@ -114,6 +114,10 @@ article {
 
 #productLevel {
   margin-bottom: 250%;
+}
+
+#firstAndLast {
+  margin-bottom: 250px;
 }
 
 #tooltip {
